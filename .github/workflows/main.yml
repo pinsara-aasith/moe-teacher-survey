@@ -1,0 +1,26 @@
+name: Deploy
+
+# Controls when the action will run. 
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:       
+    - name: Deploy using ssh
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER_NAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: 22
+        script: |
+          cd /home/census2/moe-teacher-survey
+          git pull origin main
+          git status
+          cd /home/census2/moe-teacher-survey && npm install
+          cd /home/census2/moe-teacher-survey && npm install
+          cd /home/census2/moe-teacher-survey
+          pm2 startOrRestart ecosystem.config.js --env prod
