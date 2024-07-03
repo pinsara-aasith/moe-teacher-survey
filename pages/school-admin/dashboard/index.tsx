@@ -22,6 +22,8 @@ import { FiEdit, FiTrash } from 'react-icons/fi';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import { GetServerSidePropsContext } from 'next';
+import withAuth from '../../../util/withAuth';
 
 type Teacher = {
     id: number;
@@ -41,6 +43,17 @@ const validationSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
     subject: Yup.string().required('Subject is required'),
 });
+
+
+export const getServerSideProps = (context: GetServerSidePropsContext) => withAuth(context, async (user) => {
+    console.log(user)
+    return {
+        props: {
+            
+        },
+    };
+});
+
 
 export default function Home() {
     const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -175,8 +188,8 @@ export default function Home() {
                                     </Box>
                                 </Grid>
                                 <Grid item xs={12} md={8}>
-                                    <Alert sx={{mb:2}}>ඔබගේ පාසලේ සේවයේ නිරත ගුරුවරු <b>පමණක්</b> ඇතුලත් කරන්න
-                                    <br/> உங்கள் பள்ளியில் உள்ள ஆசிரியர்களை மட்டும் உள்ளிடவும்</Alert>
+                                    <Alert sx={{ mb: 2 }}>ඔබගේ පාසලේ සේවයේ නිරත ගුරුවරු <b>පමණක්</b> ඇතුලත් කරන්න
+                                        <br /> உங்கள் பள்ளியில் உள்ள ஆசிரியர்களை மட்டும் உள்ளிடவும்</Alert>
                                     <Table>
                                         <TableHead>
                                             <TableRow>

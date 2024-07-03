@@ -36,11 +36,11 @@ const LoginPage = () => {
     formState: { errors, isSubmitting },
   } = useForm<SchoolAdminLoginData>();
 
-  const onSubmit = async (data: SchoolAdminLoginData) => {
+  const onSubmit = async (data: LoginData) => {
     await logIn(data, 'school-admin')
       .then(() => {
         showSnackbar('You have successfully logged in', 'success');
-        // Redirect to home page
+        
         router.push('/school-admin/dashboard');
       })
       .catch(err => {

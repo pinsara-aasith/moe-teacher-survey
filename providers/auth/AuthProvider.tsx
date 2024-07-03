@@ -10,7 +10,7 @@ interface AuthContextData {
   currentUser: UserSession | null
   accessToken: string | null
   refreshToken: string | null
-  logIn: (_data: LoginData, userType: UserType) => Promise<void>
+  logIn: (_data: LoginData, role: UserType) => Promise<void>
   logOut: () => void
   refreshSession: () => Promise<void>
 }
@@ -74,13 +74,13 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [refreshToken])
 
-  const logIn = async (data: LoginData, userType: UserType) => {
+  const logIn = async (data: LoginData, role: UserType) => {
     return new Promise<void>((resolve, reject) => {
       fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',},
-        body: JSON.stringify(data),
+        body: JSON.stringify({...data, role}),
       })
         .then(res => res.json() as Promise<LoginApiResponse>)
         .then(res => {

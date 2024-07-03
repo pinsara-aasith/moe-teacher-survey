@@ -1,13 +1,7 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { verifyAccessToken } from '../lib/auth'
-import { User } from '../database/schema'
-
-const redirectToLogin = {
-  redirect: {
-    destination: '/login',
-    permanent: false,
-  },
-}
+import { School, User } from '../database/schema'
+import { User as IUser } from '../lib/types/auth'
 
 export type AuthOptions = {
   redirectTo?: string
@@ -16,37 +10,56 @@ export type AuthOptions = {
 // Create a getServerSideProps utility function called "withAuth" to check user
 const withAuth = async <T extends Object = any>(
   { req }: GetServerSidePropsContext,
-  onSuccess: () => Promise<GetServerSidePropsResult<T>>,
-  options: AuthOptions = {
-    redirectTo: '/login',
+  onSuccess: (user: IUser) => Promise<GetServerSidePropsResult<T>>,
+  _options: AuthOptions = {
+    redirectTo: '/school-admin/login',
   }
 ): Promise<GetServerSidePropsResult<T>> => {
   // Get the user's session based on the request
-  if (req.cookies.token) {
-    // Get token from cookie
-    const token = req.cookies.token.split(' ')[0]
-
-    // Dececode user token and get user data
-    return verifyAccessToken(token)
-      .then(async decoded => {
-        // Now, check if user has done 2 factor authentication
-        const user = await User.findById(decoded._id)
-
-        // If user has not done 2 factor authentication, redirect to 2 factor authentication page
-        if (!user) {
-          return redirectToLogin
-        } else {
-          // If user has done 2 factor authentication, call onSuccess function
-          return onSuccess()
-        }
-      })
-      .catch(err => {
-        console.log(err)
-        return redirectToLogin
-      })
-  } else {
-    return redirectToLogin
+  if (!req.headers.token) {
+    console.log('fk1')
+    return {
+      redirect: {
+        destination: '/school-admin/login',
+        permanent: false,
+      },
+    }
   }
+
+  const token = req.cookies.token.split(' ')[0]
+
+  return verifyAccessToken(token)
+    .then(async decoded => {
+      // Now, check if user has done 2 factor authentication
+      const user = await User.findById(decoded._id)
+
+      if (user.schoolCode) {
+        user.school = await School.find({ schoolCode: decoded.schoolCode })
+      }
+
+      if (!user) {
+        console.log('fk2')
+        return {
+          redirect: {
+            destination: `/${decoded.role || 'school-admin'}/login`,
+            permanent: false,
+          },
+        }
+      } else {
+        return onSuccess(user)
+      }
+    })
+    .catch(err => {
+      console.log('fk5')
+      console.log(err)
+      return {
+        redirect: {
+          destination: '/school-admin/login',
+          permanent: false,
+        },
+      }
+    })
+
 }
 
 export default withAuth
