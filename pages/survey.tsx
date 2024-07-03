@@ -1,4 +1,4 @@
-import React, { createContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Head from 'next/head';
 import { Box, Button, Card, CardContent, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormHelperText, Grid, Stack, Typography } from '@mui/material';
 import axios from 'axios';
@@ -24,8 +24,6 @@ import CheckBoxGroup from '../components/CheckBoxGroup';
 import TextFieldComponent from '../components/TextFieldComponent';
 import { GetServerSideProps } from 'next';
 import useToast from '../hooks/use-snackbar';
-
-const FormContext = createContext(undefined);
 
 const validationSchema = Yup.object({
   "පළාත": Yup.string().required("පළාත අවශ්‍ය වේ."),
@@ -298,7 +296,6 @@ const Page = () => {
             position: 'relative'
           }}
         >
-
           <Box
             component="main"
             sx={{
@@ -306,7 +303,6 @@ const Page = () => {
               py: 4
             }}
           >
-
             <Dialog
               open={open}
               onClose={() => setOpen(false)}

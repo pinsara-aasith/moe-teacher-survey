@@ -30,9 +30,9 @@ export const verifyToken = (
         const userSession: UserSession = {
           _id: userDecoded._id,
           email: userDecoded.email,
+          schoolCode: userDecoded.schoolCode,
           role: userDecoded.role,
           name: userDecoded.name,
-          surname: userDecoded.surname,
         }
         resolve(userSession)
       })

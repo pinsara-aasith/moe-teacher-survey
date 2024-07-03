@@ -568,7 +568,6 @@ The JWT access token and the JWT refresh token have the following payload:
   "sub": <user id>,
   "email": <user email>,
   "name": <user first name>,
-  "surname": <user last name>,
   "role": <user role: ADMIN or USER>,
   "iat": <issued at timestamp>,
   "exp": <expire at timestamp>,

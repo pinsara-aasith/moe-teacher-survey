@@ -41,6 +41,7 @@ const refreshRoute = async (
         email: decoded.email,
       })
 
+
       // If user does not exist, return a 401 response
       if (!user) {
         return res.status(401).json({
@@ -56,10 +57,10 @@ const refreshRoute = async (
       } else {
         const session: UserSession = {
           _id: user.id,
+          schoolCode: user.schoolCode,
           email: user.email,
           role: user.role,
           name: user.name,
-          surname: user.surname,
         }
 
         // If user exists, generate new access token

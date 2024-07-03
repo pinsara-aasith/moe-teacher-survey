@@ -1,46 +1,49 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { withMiddlewares } from '../../middlewares'
 
 import * as auth from '../../lib/auth'
 import { UserSession } from '../../lib/types/auth'
-import { LoginApiResponse } from '../login/login'
 import { sendEmail } from '../../lib/mail'
 import { User } from '../../database/schema'
 
 const loginRoute = async (
   req: NextApiRequest,
-  res: NextApiResponse<LoginApiResponse>
+  res: NextApiResponse
 ) => {
-  // Extract email and password from request body
-  const { email, password } = req.body as { email: string; password: string }
+  const { schoolCode, email, password, userType } = req.body as { schoolCode?: string; email?: string, password: string, userType: string }
 
-  // If email or password is not present, return a 400 response
-  if (!email || !password) {
+
+  if (!(userType) ||
+    !(userType == 'school-admin' || userType == 'system-admin')) {
     return res.status(400).json({
       success: false,
-      message: 'Missing email or password',
+      message: 'Invalid user type',
     })
   }
 
-  // Check if user exists in database
-  const user = await User.findOne({ email })
+
+  if (!(schoolCode || email) || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Missing email/schoolcode or password',
+    })
+  }
+
+  const user = await User.findOne({ schoolCode, userType })
 
   // If user does not exist, return a 401 response
   if (!user) {
     return res.status(401).json({
       success: false,
-      message: 'Invalid email or password',
+      message: 'Invalid email/schoolcode or password',
     })
   } else {
-    // If user exists, check if password is correct using auth lib
     if (await auth.verifyPassword(password, user.password)) {
-      // Keep only fields defined in SessionUser
       const session: UserSession = {
         _id: user._id as string,
+        schoolCode: schoolCode,
         email: user.email,
         name: user.name,
-        surname: user.surname,
         role: user.role,
       }
 
@@ -81,7 +84,7 @@ const loginRoute = async (
     } else {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: 'Invalid email/schoolcode or password',
       })
     }
   }

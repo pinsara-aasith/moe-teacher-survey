@@ -3,12 +3,14 @@ import { UserSession } from '../../lib/types/auth'
 import { LoginApiResponse } from '../../pages/school-admin/login/login'
 import { RefreshApiResponse } from '../../pages/api/refresh'
 
+
+
 interface AuthContextData {
   isAuthenticated: boolean
   currentUser: UserSession | null
   accessToken: string | null
   refreshToken: string | null
-  logIn: (_data: LoginData) => Promise<void>
+  logIn: (_data: LoginData, userType: UserType) => Promise<void>
   logOut: () => void
   refreshSession: () => Promise<void>
 }
@@ -72,32 +74,24 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [refreshToken])
 
-  const logIn = async (data: LoginData) => {
+  const logIn = async (data: LoginData, userType: UserType) => {
     return new Promise<void>((resolve, reject) => {
-      // Send data to API
       fetch('/api/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json',},
         body: JSON.stringify(data),
       })
         .then(res => res.json() as Promise<LoginApiResponse>)
         .then(res => {
           if (res.success && res.data) {
-            // save access token in cookies
             document.cookie = `token=${res.data.token} secure`
 
-            // Save refresh token in session storage for persistence
             localStorage.setItem('refreshToken', res.data.refreshToken)
 
-            // Save access token and refresh token
             setRefreshToken(res.data.refreshToken)
-
-            // save user data inside state
             setCurrentUser(res.data.session)
 
-            // save current user in local storage
             localStorage.setItem(
               'currentUser',
               JSON.stringify(res.data.session)
@@ -105,7 +99,6 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
             // set isAuthenticated to true
             setIsAuthenticated(true)
-
             // set auth state
             resolve()
           } else {

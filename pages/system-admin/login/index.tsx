@@ -37,7 +37,7 @@ const LoginPage = () => {
   } = useForm<SystemAdminLoginData>();
 
   const onSubmit = async (data: LoginData) => {
-    await logIn(data)
+    await logIn(data, 'system-admin')
       .then(() => {
         showSnackbar('You have successfully logged in', 'success');
         // Redirect to home page
@@ -127,10 +127,10 @@ const LoginPage = () => {
                   <FormControl sx={{ mt: 2 }} fullWidth error={!!errors.email}>
                     <TextField
                       id="email"
-                      label="Email | පාසලේ සංගණන අංකය | பள்ளியின் குறியீடு"
+                      label="Email | විද්යුත් තැපෑල | மின்னஞ்சல்"
                       variant="outlined"
                       {...register('email', {
-                        required: 'School code is required',
+                        required: 'Email is required',
                       })}
 
                       sx={{ width: '100%' }}

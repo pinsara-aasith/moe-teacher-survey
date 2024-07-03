@@ -37,7 +37,7 @@ const LoginPage = () => {
   } = useForm<SchoolAdminLoginData>();
 
   const onSubmit = async (data: SchoolAdminLoginData) => {
-    await logIn(data)
+    await logIn(data, 'school-admin')
       .then(() => {
         showSnackbar('You have successfully logged in', 'success');
         // Redirect to home page
