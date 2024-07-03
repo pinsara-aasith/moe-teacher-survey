@@ -41,7 +41,7 @@ const LoginPage = () => {
       .then(() => {
         showSnackbar('You have successfully logged in', 'success');
         // Redirect to home page
-        router.push('/two-factor');
+        router.push('/system-admin/dashboard');
       })
       .catch(err => {
         showSnackbar(err.message, 'error');

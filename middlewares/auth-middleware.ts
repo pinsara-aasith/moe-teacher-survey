@@ -41,14 +41,7 @@ export const authMiddleware: Middleware = async <T extends ApiResponse<T>>(
         success: false,
         message: 'Invalid token',
       } as T)
-    } else {
-      if (user.twoFactorToken) {
-        return res.status(401).json({
-          success: false,
-          message: '2 factor authentication is required, check your email',
-        } as T)
-      }
-    }
+    } 
 
     // Add user to request
     req.user = decoded

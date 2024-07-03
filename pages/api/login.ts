@@ -50,7 +50,6 @@ const loginRoute = async (
       // generate access + refresh token + email token for 2 factor authentication
       const token = auth.generateAccessToken(session)
       const refreshToken = auth.generateRefreshToken(session)
-      const twoFactorToken = auth.generateTwoFactorToken(session)
 
       // save refresh token + second factor auth to database
       User.findByIdAndUpdate(
@@ -58,19 +57,10 @@ const loginRoute = async (
         {
           $set: {
             refreshToken,
-            twoFactorToken,
           }
         }
       );
 
-
-      //  Send email with specified token
-      sendEmail({
-        to: user.email,
-        subject: 'JWT Authentication - Two factor authentication',
-        text: `Click this link to login...`,
-        html: `<a href="http://localhost:3000/two-factor?token=${twoFactorToken}">Click here to login</a>`,
-      })
 
       // return access and refresh token
       return res.status(200).json({

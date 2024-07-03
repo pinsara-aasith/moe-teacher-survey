@@ -2,7 +2,6 @@
 import type { NextApiResponse } from 'next'
 import { withMiddlewares } from '../../middlewares'
 
-import { LoginApiResponse } from '../login/login'
 import {
   authMiddleware,
   NextApiRequestWithUser,
@@ -11,7 +10,7 @@ import { User } from '../../database/schema'
 
 const twoFactorAuthRoute = async (
   req: NextApiRequestWithUser,
-  res: NextApiResponse<LoginApiResponse>
+  res: NextApiResponse
 ) => {
   // Extract email and password from request body
   const { token } = req.body as { token: string }

@@ -11,7 +11,6 @@ const redirectToLogin = {
 
 export type AuthOptions = {
   redirectTo?: string
-  twoFactorEnabled?: boolean
 }
 
 // Create a getServerSideProps utility function called "withAuth" to check user
@@ -20,7 +19,6 @@ const withAuth = async <T extends Object = any>(
   onSuccess: () => Promise<GetServerSidePropsResult<T>>,
   options: AuthOptions = {
     redirectTo: '/login',
-    twoFactorEnabled: true,
   }
 ): Promise<GetServerSidePropsResult<T>> => {
   // Get the user's session based on the request
@@ -36,8 +34,6 @@ const withAuth = async <T extends Object = any>(
 
         // If user has not done 2 factor authentication, redirect to 2 factor authentication page
         if (!user) {
-          return redirectToLogin
-        } else if (options.twoFactorEnabled && user.twoFactorToken) {
           return redirectToLogin
         } else {
           // If user has done 2 factor authentication, call onSuccess function

@@ -22,7 +22,7 @@ interface IUser extends Document {
   name: string;
   role: Role;
   refreshToken?: string;
-  twoFactorToken?: string;
+  // twoFactorToken?: string;
 }
 
 interface IPost extends Document {
@@ -54,7 +54,7 @@ const UserSchema: Schema<IUser> = new Schema({
   name: { type: String, required: true },
   role: { type: String, enum: Object.values(Role), default: Role.USER },
   refreshToken: { type: String },
-  twoFactorToken: { type: String },
+  // twoFactorToken: { type: String },
 });
 
 // Post Schema

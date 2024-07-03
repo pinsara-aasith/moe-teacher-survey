@@ -5,9 +5,9 @@ import {
   NextPage,
 } from 'next';
 import { useRouter } from 'next/router';
-import { verifyTwoFactorToken } from '../lib/auth';
 import { User } from '../database/schema';
 import withAuth from '../util/withAuth';
+import { verifyTwoFactorToken } from '../lib/auth';
 
 type AvailableStatus = 'success' | 'error' | 'info';
 
