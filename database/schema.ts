@@ -48,12 +48,12 @@ const SchoolSchema: Schema<ISchool> = new Schema({
 
 // User Schema
 const UserSchema: Schema<IUser> = new Schema({
-  email: { type: String, unique: true, required: false },
-  schoolCode: { type: String, unique: true, required: false },
+  email: { type: String, unique: true, required: false, index: true },
+  schoolCode: { type: String, unique: true, required: false, index: true  },
   password: { type: String, required: true },
   name: { type: String, required: true },
   role: { type: String, enum: Object.values(Role), default: Role.USER },
-  refreshToken: { type: String },
+  refreshToken: { type: String, index: true },
   // twoFactorToken: { type: String },
 });
 
