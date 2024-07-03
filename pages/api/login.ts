@@ -3,7 +3,6 @@ import { withMiddlewares } from '../../middlewares'
 
 import * as auth from '../../lib/auth'
 import { UserSession } from '../../lib/types/auth'
-import { sendEmail } from '../../lib/mail'
 import { User } from '../../database/schema'
 
 const loginRoute = async (
