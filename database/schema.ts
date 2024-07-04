@@ -1,9 +1,9 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Model, Schema } from 'mongoose';
 
 // Create enums for user role and vote type
 enum Role {
-  ADMIN = 'system-admin',
-  USER = 'school-admin'
+  SYSTEM_ADMIN = 'system-admin',
+  SCHOOL_ADMIN = 'school-admin'
 }
 
 interface ISchool {
@@ -17,7 +17,7 @@ interface ISchool {
 // Define TypeScript interfaces for your models
 interface IUser extends Document {
   email: string;
-  schoolCode: string;
+  school: ISchool | string;
   password: string;
   name: string;
   role: Role;
@@ -49,10 +49,14 @@ const SchoolSchema: Schema<ISchool> = new Schema({
 // User Schema
 const UserSchema: Schema<IUser> = new Schema({
   email: { type: String, unique: true, required: false, index: true },
-  schoolCode: { type: String, unique: true, required: false, index: true  },
+  school: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "School",
+    unique: false, required: false, index: true
+  },
   password: { type: String, required: true },
   name: { type: String, required: true },
-  role: { type: String, enum: Object.values(Role), default: Role.USER },
+  role: { type: String, enum: Object.values(Role), default: Role.SCHOOL_ADMIN },
   refreshToken: { type: String, index: true },
   // twoFactorToken: { type: String },
 });
@@ -70,9 +74,9 @@ const PostSchema: Schema<IPost> = new Schema({
 
 
 // Create models
-const School = mongoose.models.School || mongoose.model<ISchool>('School', SchoolSchema);
-const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
-const Post = mongoose.models.Post || mongoose.model<IPost>('Post', PostSchema);
+const School: Model<ISchool> = mongoose.models.School || mongoose.model<ISchool>('School', SchoolSchema);
+const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const Post: Model<IPost> = mongoose.models.Post || mongoose.model<IPost>('Post', PostSchema);
 
 
 export { User, Post, School, Role };

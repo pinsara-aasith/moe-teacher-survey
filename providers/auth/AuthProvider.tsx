@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { UserSession } from '../../lib/types/auth'
 import { LoginApiResponse } from '../../pages/school-admin/login/login'
-import { RefreshApiResponse } from '../../pages/api/refresh'
+import { RefreshApiResponse } from '../../app/api/refresh'
 
 
 

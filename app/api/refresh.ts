@@ -1,8 +1,8 @@
-import { NextApiResponse } from 'next'
+import { NextResponse } from 'next'
 import { verifyToken } from '../../lib/jwt'
 
 import { withMiddlewares } from '../../middlewares'
-import { NextApiRequestWithUser } from '../../middlewares/auth-middleware'
+import { NextRequestWithUser } from '../../middlewares/auth-middleware'
 import { generateAccessToken } from '../../lib/auth'
 import { ApiResponse } from '../../lib/types/api'
 import { UserSession } from '../../lib/types/auth'
@@ -13,8 +13,8 @@ export type RefreshApiResponse = ApiResponse<{
 }>
 
 const refreshRoute = async (
-  req: NextApiRequestWithUser,
-  res: NextApiResponse<RefreshApiResponse>
+  req: NextRequestWithUser,
+  res: NextResponse<RefreshApiResponse>
 ) => {
   // Read refresh token from body
   const { refreshToken } = req.body

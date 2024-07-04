@@ -1,34 +1,27 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { withMiddlewares } from '../../middlewares'
-
-import * as auth from '../../lib/auth'
-import { UserSession } from '../../lib/types/auth'
-import { User } from '../../database/schema'
+import * as auth from '../../../lib/auth'
+import { UserSession } from '../../../lib/types/auth'
+import { User } from '../../../database/schema'
 import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
 
-const loginRoute = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
-  if (req.method != 'POST') return res.status(405).json({
-    message: 'Unsupported operation',
-  });
 
-  const { schoolCode, email, password, role } = req.body as { schoolCode?: string; email?: string, password: string, role: string }
+export async function POST(req: NextRequest) {
+  const { schoolCode, email, password, role } = await req.json() as { schoolCode?: string; email?: string, password: string, role: string }
 
   if (!(role) ||
     !(role == 'school-admin' || role == 'system-admin')) {
-    return res.status(400).json({
+    return NextResponse.json({
       success: false,
       message: 'Invalid user type',
-    })
+    }, { status: 400 });
+
   }
 
   if (!(schoolCode || email) || !password) {
-    return res.status(400).json({
+    return NextResponse.json({
       success: false,
       message: 'Missing email/schoolcode or password',
-    })
+    }, { status: 400 });
   }
 
   let user;
@@ -36,7 +29,6 @@ const loginRoute = async (
 
   if (role == 'school-admin') {
     user = await User.findOne({ schoolCode, role: 'school-admin' })
-    console.log(req.body)
     if (!user) {
       errorMessage = 'Invalid school code or password!'
     }
@@ -49,10 +41,10 @@ const loginRoute = async (
   }
 
   if (!user) {
-    return res.status(401).json({
+    return NextResponse.json({
       success: false,
       message: errorMessage || 'Invalid credentials!',
-    })
+    }, { status: 401 });
   }
 
   // If user does not exist, return a 401 response
@@ -87,22 +79,20 @@ const loginRoute = async (
     });
 
 
-    // return access and refresh token
-    return res.status(200).json({
+    return NextResponse.json({
       success: true,
       data: {
         token,
         refreshToken,
         session,
       },
-    })
+    }, { status: 200 })
   } else {
-    return res.status(401).json({
+    return NextResponse.json({
       success: false,
       message: 'Invalid password!',
-    })
+    }, { status: 401 });
   }
 
 }
 
-export default withMiddlewares(loginRoute)

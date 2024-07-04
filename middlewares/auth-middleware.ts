@@ -1,18 +1,18 @@
 import { TokenExpiredError } from 'jsonwebtoken'
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextApiResponse } from 'next'
 import { verifyToken } from '../lib/jwt'
 import { ApiResponse } from '../lib/types/api'
 import { UserSession } from '../lib/types/auth'
 import { Middleware } from '../lib/types/middleware'
 import { User } from '../database/schema'
 
-export type NextApiRequestWithUser = NextApiRequest & {
+export type NextRequestWithUser = NextRequest & {
   user: UserSession
 }
 
 // middleware.ts
 export const authMiddleware: Middleware = async <T extends ApiResponse<T>>(
-  req: NextApiRequestWithUser,
+  req: NextRequestWithUser,
   res: NextApiResponse<T>,
   next?: Middleware
 ) => {

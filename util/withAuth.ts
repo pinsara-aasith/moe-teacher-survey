@@ -16,8 +16,7 @@ const withAuth = async <T extends Object = any>(
   }
 ): Promise<GetServerSidePropsResult<T>> => {
   // Get the user's session based on the request
-  if (!req.headers.token) {
-    console.log('fk1')
+  if (!req.cookies.token) {
     return {
       redirect: {
         destination: '/school-admin/login',
@@ -31,14 +30,13 @@ const withAuth = async <T extends Object = any>(
   return verifyAccessToken(token)
     .then(async decoded => {
       // Now, check if user has done 2 factor authentication
-      const user = await User.findById(decoded._id)
+      const user = await User.findById(decoded._id).lean()
 
       if (user.schoolCode) {
         user.school = await School.find({ schoolCode: decoded.schoolCode })
       }
 
       if (!user) {
-        console.log('fk2')
         return {
           redirect: {
             destination: `/${decoded.role || 'school-admin'}/login`,
@@ -50,7 +48,6 @@ const withAuth = async <T extends Object = any>(
       }
     })
     .catch(err => {
-      console.log('fk5')
       console.log(err)
       return {
         redirect: {

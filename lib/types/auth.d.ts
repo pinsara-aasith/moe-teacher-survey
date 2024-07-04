@@ -1,6 +1,6 @@
 type User = {
   _id: string
-  schoolCode?: string
+  school?: string
   email?: string
   name: string
   password: string

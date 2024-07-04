@@ -4,13 +4,13 @@ import { UserSession } from '../../lib/types/auth'
 import { withMiddlewares } from '../../middlewares'
 import {
   authMiddleware,
-  NextApiRequestWithUser,
+  NextRequestWithUser,
 } from '../../middlewares/auth-middleware'
 
 export type UserApiResponse = ApiResponse<UserSession>
 
 const getCurrentUserRoute = (
-  req: NextApiRequestWithUser,
+  req: NextRequestWithUser,
   res: NextApiResponse<UserApiResponse>
 ) => {
   res.status(200).json({
