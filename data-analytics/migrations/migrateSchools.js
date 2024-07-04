@@ -5,7 +5,7 @@ import fs from 'fs'
 const schoolsJsonContent = fs.readFileSync('../data/schools.json', 'utf8');
 const schoolsData = JSON.parse(schoolsJsonContent);
 
-dotenv.config({ path: '../../edu-api/.env' });
+dotenv.config({ path: '../../.env' });
 
 async function migrateData() {
     try {

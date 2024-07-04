@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 
-const fileContent = readFileSync('govt_school_names (1).json', 'utf8');
+const fileContent = readFileSync('School_Level_User_Names_Passwords', 'utf8');
 
 const jsonArray = JSON.parse(fileContent);
 
@@ -17,8 +17,6 @@ jsonArray.forEach(item => {
         data.push({ code, name });
     }
 });
-
-
 
 
 const fileContent2 = readFileSync('govt_school_names (4).json', 'utf8');
