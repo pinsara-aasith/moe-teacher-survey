@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import Head from 'next/head';
-import { Box, Button, Card, CardContent, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormHelperText, Grid, Stack, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Container, FormHelperText, Grid, Stack, Step, StepLabel, Stepper, Typography } from '@mui/material';
 import axios from 'axios';
 import { nirathawenaKaaryaya } from '../lib/data/consts';
 import Image from 'next/image';
@@ -49,7 +49,7 @@ const validationSchema = Yup.object({
   "ඉහළම වෘත්තීය සුදුසුකම අයත් කාණ්ඩය": Yup.string().required("ඉහළම වෘත්තීය සුදුසුකම අයත් කාණ්ඩය අවශ්‍ය වේ."),
   "ඉහළම වෘත්තීය සුදුසුකම": Yup.string().required("ඉහළම වෘත්තීය සුදුසුකම අවශ්‍ය වේ."),
   "පත්වීම් වර්ගීකරණය අනුව අයත්වන සේවාව": Yup.string().required("පත්වීම් වර්ගීකරණය අනුව අයත්වන සේවාව අවශ්‍ය වේ."),
-  "වර් තමානයේ අයත්වන පන්තිය/හා ශ්‍රේණිය": Yup.string().required("වර් තමානයේ අයත්වන පන්තිය/හා ශ්‍රේණිය අවශ්‍ය වේ."),
+  "වර්තමානයේ අයත්වන පන්තිය/හා ශ්‍රේණිය": Yup.string().required("වර්තමානයේ අයත්වන පන්තිය/හා ශ්‍රේණිය අවශ්‍ය වේ."),
   "වර්තමාන පන්තියට/හා ශ්‍රේණියට පත් වූ/උසස් වූ දිනය": Yup.date().required("වර්තමාන පන්තියට/හා ශ්‍රේණියට පත් වූ/උසස් වූ දිනය අවශ්‍ය වේ."),
   "වර්තමාන සේවයට පත් වූ දිනය": Yup.date().required("වර්තමාන සේවයට පත් වූ දිනය අවශ්‍ය වේ."),
   "වර්තමාන සේවයට පත් වූ භාෂා මාධ්‍යය": Yup.string().required("වර්තමාන සේවයට පත් වූ භාෂා මාධ්‍යය අවශ්‍ය වේ."),
@@ -104,9 +104,7 @@ const Page = () => {
       console.error(error)
       showSnackbarError('Error submitting survey data!',)
     });
-
   };
-
 
   //#region <21-22>
   const ans_21 = watch('පත්වීම් විෂය අයත්වන අංශය');
@@ -268,6 +266,577 @@ const Page = () => {
     setSchools([]);
   }, [selectedProvince, selectedZone, selectedDivision])
 
+  const [activeStep, setActiveStep] = useState(0);
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
+
+  const steps = ['පුද්ගල තොරතුරු', 'අධ්‍යාපන සුදුසුකම', 'පත්වීම් වර්ගීකරණය', 'උගන්වන විෂයයන් පිළිබඳ තොරතුරු', 'අමතර තොරතුරු', 'තොරතුරු යවන්න'];
+
+  function getStepContent(step: number) {
+    switch (step) {
+      case 0:
+        return (
+          <Stack
+            direction="column"
+            justifyContent="space-between"
+            spacing={3}
+            sx={{ mb: 3 }}
+          >
+
+            <p style={{ fontSize: "20px", fontWeight: 'bold' }}>
+              පුද්ගල තොරතුරු
+            </p>
+            <TextFieldComponent label="01-A ජාතික හැඳුනුම්පත් අංකය" name="ජාතික හැඳුනුම්පත් අංකය" />
+
+
+            <TextFieldComponent label="01-B  අත්සන් ලේඛනයේ අංකය"
+              name="අත්සන් ලේඛනයේ අංකය" />
+            <TextFieldComponent label="01-C වැටුප් ලේඛනයේ අංකය"
+              name="වැටුප් ලේඛනයේ අංකය" />
+            <RadioButtonGroup
+              name="තරාතිරම (Title)"
+              label="02. තරාතිරම (Title) "
+              options={[
+                'Ven',
+                'Rev. Fr/Sr',
+                'Mr.',
+                'Mrs.',
+                'Ms.'
+              ]}
+            />
+            <TextFieldComponent label="03-B. සම්පූර්ණ නම ඉංග්‍රීසියෙන්"
+              name="සම්පූර්ණ නම" />
+            <TextFieldComponent label="03-A. මුලකූරු සමග නම ඉංග්‍රීසියෙන්"
+              name="මුලකූරු සමග නම" />
+
+            <p style={{ fontSize: "20px", fontWeight: 'bold' }}>
+              {t('ඔබ දැනට සේවය කරන පාසල පිළිබඳ විස්තර')}
+              <br />
+              <span style={{ fontSize: "15px", fontWeight: '' }}>
+                {t('(තාවකාලිකව අනුයුක්තව සිටින්නන් මෙහිදී වැටුප් ලේඛනයේ නම ඇතුළත් වන පාසල පිළිබඳව සඳහන් කළ යුතු වේ)')}
+              </span>
+            </p>
+            <Grid container
+            >
+              <Grid item
+                xs={4}>
+                <SelectField name={"පළාත"}
+                  label={"පළාත"}
+                  options={provinces} />
+              </Grid>
+
+              <Grid item
+                xs={4}>
+                <SelectField name={"කලාපය"}
+                  label={"කලාපය"}
+                  options={zones} />
+                {!selectedProvince && <FormHelperText>පළමුව පළාත තෝරන්න</FormHelperText>}
+              </Grid>
+
+
+              <Grid item
+                xs={4}>
+                <SelectField name={"කොට්ඨාශය"}
+                  label={"කොට්ඨාශය"}
+                  options={divisions} />
+                {!selectedZone && <FormHelperText>පළමුව කලාපය තෝරන්න</FormHelperText>}
+              </Grid>
+            </Grid>
+            <div style={{ marginTop: '20px' }}></div>
+            <SelectField
+              name={"පාසලේ නම සහ පාසල් සංගණන අංකය"}
+              label="වැටුප් ලේඛනයේ නම ඇතුළත් වන පාසලේ නම සහ පාසල් සංගණන අංකය"
+              options={schools?.map(s => s.name)}
+            />
+
+            <RadioButtonGroup
+              name="මෙම පාසලේ දරණ තනතුර"
+              label="04. මෙම පාසලේ දරණ තනතුර"
+              options={[
+                'විදුහල්පති',
+                'වැ.බ. විදුහල්පති/විදුහල්පති වැඩ ආවර්ණය',
+                'නියෝජ්‍ය විදුහල්පති/වැ.බ.නි.විදුහල්පති',
+                'සහකාර විදුහල්පති/වැ.බ.ස. විදුහල්පති',
+                'අංශ ප්‍රධානි/වැ.බ.අංශ ප්‍රධානි',
+                'ශ්‍රේණි ප්‍රධානි',
+                'ගුරු උපදේශක',
+                'ගුරුවරයා',
+                'ගුරු සහායක/ස්වේච්ඡා ගුරු'
+              ]}
+            />
+
+
+            <RadioButtonGroup
+              label="05. මෙම පාසලේ සේවය කරන පදනම වනුයේ"
+              options={[
+                'මෙම පාසලේ වැටුප් ලේඛනයට ඇතූළත් හා මෙම පාසලේම පූර්ණකාලීනව/අර්ධ කාලීනව සේවය කරන',
+                'මෙම පාසලේ වැටුප් ලේඛනයට ඇතුළත් නමුත් වෙනත් පාසලකට තාවකාලිකව අනුයුක්තව සිටින',
+                'මෙම පාසලේ වැටුප් ලේඛනයට ඇතුළත් නමුත් වෙනත් කාර්යාලයකට/ ආයතනයකට තාවකාලිකව අනුයුක්තව සිටින',
+                'මෙම පාසලේ වැටුප් ලේඛනයට ඇතුළත් දැනට වැටුප් සහිත නිවාඩු ගොස් ඇති (විශ්‍රාම පූර්ව නිවාඩු ලබා ඇති/ප්‍රසූත නිවාඩු ගොස් ඇති/අධ්‍යයන නිවාඩු ලබා ඇති) ආදී',
+                'මෙම පාසලේ වැටුප් ලේඛනයට ඇතුළත් දැනට වැටුප් රහිත නිවාඩු ගොස් ඇති/තාවකාලිකව වැඩ තහනම් වී ඇති'
+              ]}
+              name={'මෙම පාසලේ සේවය කරන පදනම වනුයේ'}
+            />
+
+            <TextFieldComponent label="06. උපන් දිනය-(YYYY-MM-DD [උදාහරන 1985-11-02])"
+              name="උපන් දිනය" />
+            <RadioButtonGroup
+              label="07. ස්ත්‍රී පුරුෂ භාවය"
+              options={[
+                'පුරුෂ',
+                'ස්ත්‍රී'
+              ]}
+              name={'ස්ත්‍රී පුරුෂ භාවය'}
+            />
+
+            <RadioButtonGroup
+              label="08. ජන වර්ගය"
+              options={[
+                'සිංහල',
+                'දෙමළ',
+                'මුස්ලිම්',
+                'වෙනත්'
+              ]}
+              name={'ජන වර්ගය'}
+            />
+
+            <RadioButtonGroup
+              label="09. ආගම"
+              options={[
+                'බෞද්ධ',
+                'හින්දු',
+                'ඉස්ලාම්',
+                'කතෝලික',
+                'ක්‍රිස්තියානි',
+                'වෙනත්'
+              ]}
+              name={'ආගම'}
+            />
+            <RadioButtonGroup
+              label="10. වර්තමාන විවාහක තත්ත්වය"
+              options={[
+                'විවාහක',
+                'අවිවාහක',
+                'වැන්දඹු',
+                'වෙනත්'
+              ]}
+              name={'වර්තමාන විවාහක තත්ත්වය'}
+            />
+          </Stack>
+        );
+      case 1:
+        return (
+          <Stack
+            direction="column"
+            justifyContent="space-between"
+            spacing={3}
+            sx={{ mb: 3 }}
+          >
+
+            <p style={{ fontSize: "20px", fontWeight: 'bold' }}>
+              අධ්‍යාපන සුදුසුකම
+            </p>
+
+            <RadioButtonGroup
+              label="11. ඉහළම අධ්‍යාපන සුදුසුකම"
+              options={[
+                'අ.පො.ස.(සා / පෙළ)ට අඩු',
+                'අ.පො.ස.(සා / පෙළ) හෝ ඊට සමාන්තර (O/L)',
+                'අ.පො.ස.(උ / පෙළ) හෝ ඊට සමාන්තර (A/L)',
+                'උපාධි හෝ ඊට සමාන්තර (BA/BSc/BEd…)',
+                'පශ්චාත් උපාධි ඩිප්ලෝමා හෝ ඊට සමාන්තර (PG Dip)',
+                'පශ්චාත් උපාධි හෝ ඊට සමාන්තර (MA/MSc/MEd…)',
+                'දර්ශනපති උපාධි හෝ ඊට සමාන්තර (MPhil)',
+                'දර්ශනශූරී උපාධි හෝ ඊට සමාන්තර (PhD)'
+              ]}
+              name={'ඉහළම අධ්‍යාපන සුදුසුකම'}
+            />
+
+            <RadioButtonGroup
+              label="12. අ.පො.ස. (උ/පෙළ) දී හැදෑරූ විෂය ධාරාව"
+              options={[
+                'ජීව විද්‍යා',
+                'භෞතික විද්‍යා (ගණිත)',
+                'කලා',
+                'වාණිජ',
+                'ජෛව පද්ධති තාක්ෂණවේදය',
+                'ඉංජිනේරු තාක්ෂණවේදය',
+                'පොදු විෂය ධාරාව'
+              ]}
+              name={'අ.පො.ස. (උ/පෙළ) දී හැදෑරූ විෂය ධාරාව'}
+            />
+            <RadioButtonGroup
+              label="13. මූලික උපාධියක් ලබා ඇත්නම් එය අයත් ක්ෂේත්‍රය"
+              options={[
+                'අධ්‍යාපන',
+                'ජීව විද්‍යා',
+                'භෞතික විද්‍යා',
+                'කලා',
+                'කළමනාකරණ/ වාණිජ්‍ය',
+                'කෘෂිකර්ම',
+                'පරිගණක ආශ්‍රිත',
+                'වෙනත්'
+
+              ]}
+              name={'මූලික උපාධියක් ලබා ඇත්නම් එය අයත් ක්ෂේත්‍රය'}
+            />
+
+
+
+            <p style={{ fontSize: "20px", fontWeight: 'bold' }}>ඉහළම වෘත්තීය සුදුසුකම</p>
+
+            <Grid container spacing={0}>
+              <Grid item
+                xs={6}
+                sx={{ paddingRight: '10px' }}  >
+                <SelectField name={"ඉහළම වෘත්තීය සුදුසුකම අයත් කාණ්ඩය"}
+                  label={"14. ඉහළම වෘත්තීය සුදුසුකම අයත් කාණ්ඩය"}
+                  options={highestEducationCategories} />
+              </Grid>
+
+              <Grid item
+                xs={6}>
+                <SelectField name={"ඉහළම වෘත්තීය සුදුසුකම"}
+                  label={"15. ඉහළම වෘත්තීය සුදුසුකම"}
+                  options={highestEducations}
+                  disabled={!highestEducations.length} />
+                {(!selectedHighestEducationCategory && !!highestEducations.length) && <FormHelperText>පළමුව ඉහළම වෘත්තීය සුදුසුකම අයත් කාණ්ඩය තෝරන්න</FormHelperText>}
+              </Grid>
+            </Grid>
+          </Stack>
+        );
+
+      case 2:
+        return (
+          <Stack
+            direction="column"
+            justifyContent="space-between"
+            spacing={3}
+            sx={{ mb: 3 }}
+          >
+
+            <p style={{ fontSize: "20px", fontWeight: 'bold' }}>පත්වීම් වර්ගීකරණය</p>
+            <Grid container spacing={0}>
+              <Grid item
+                xs={6}
+                sx={{ paddingRight: '10px' }}  >
+
+                <SelectField name={"පත්වීම් වර්ගීකරණය අනුව අයත්වන සේවාව"}
+                  label={"16. පත්වීම් වර්ගීකරණය අනුව අයත්වන සේවාව"}
+                  options={services} />
+              </Grid>
+
+              <Grid item
+                xs={6}>
+                <SelectField name={"වර්තමානයේ අයත්වන පන්තිය/හා ශ්‍රේණිය"}
+                  label={"17. වර්තමානයේ අයත්වන පන්තිය/හා ශ්‍රේණිය"}
+                  options={serviceClasses}
+                  disabled={!serviceClasses.length} />
+                {(!selectedService && !!serviceClasses.length) && <FormHelperText>පළමුව පත්වීම් වර්ගීකරණය අනුව අයත්වන සේවාව තෝරන්න</FormHelperText>}
+              </Grid>
+            </Grid>
+
+
+            <TextFieldComponent label="18. වර්තමාන පන්තියට/හා ශ්‍රේණියට පත් වූ/උසස් වූ දිනය-(YYYY-MM-DD [උදාහරන 1989-05-09])"
+              name="වර්තමාන පන්තියට/හා ශ්‍රේණියට පත් වූ/උසස් වූ දිනය" />
+            <TextFieldComponent label="19. වර්තමාන සේවයට පත් වූ දිනය-(YYYY-MM-DD [උදාහරන 2000-01-31])"
+              name="වර්තමාන සේවයට පත් වූ දිනය" />
+            <RadioButtonGroup
+              label="20. වර්තමාන සේවයට පත් වූ භාෂා මාධ්‍යය"
+              options={[
+                'සිංහල මාධ්‍යය',
+                'දෙමළ මාධ්‍යය',
+                'ඉංග්‍රීසි මාධ්‍යය'
+              ]}
+              name={'වර්තමාන සේවයට පත් වූ භාෂා මාධ්‍යය'}
+            />
+            <HorizontalLine />
+            <p style={{ fontSize: "20px", fontWeight: 'bold' }}>පත්වීම් විෂය</p>
+
+            <RadioButtonGroup
+              label="21. පත්වීම් විෂය අයත්වන අංශය"
+              options={list_21}
+              name={'පත්වීම් විෂය අයත්වන අංශය'}
+            />
+
+            <Grid container spacing={0}>
+              <Grid item
+                xs={6}
+                sx={{ paddingRight: '10px' }}  >
+
+                <SelectField
+                  name={"පත්වීම් විෂය අයත්වන කාණ්ඩය"}
+                  label="22.A. පත්වීම් විෂය අයත්වන කාණ්ඩය"
+                  options={list_22_a} />
+                {(!ans_21 && !!list_21.length) && <FormHelperText>පළමුව පත්වීම් විෂය තෝරන්න</FormHelperText>}
+              </Grid>
+
+              <Grid item
+                xs={6}>
+                <SelectField
+                  name={"පත්වීම් විෂය"}
+                  label="22.B. පත්වීම් විෂය"
+                  options={list_22_b}
+                  disabled={!list_22_b.length} />
+                {(!ans_22_a && !!list_22_a.length) && <FormHelperText>පළමුව පත්වීම් විෂය අයත්වන කාණ්ඩය තෝරන්න</FormHelperText>}
+              </Grid>
+            </Grid>
+          </Stack>
+        );
+
+      case 3:
+        return (
+          <Stack
+            direction="column"
+            justifyContent="space-between"
+            spacing={3}
+            sx={{ mb: 3 }}
+          >
+            <p style={{ fontSize: "22px", fontWeight: 'bold' }}>
+              වැඩිම කාලයක් හා දෙවනුව වැඩිම කාලයක් උගන්වන විෂයයන් පිළිබඳ තොරතුරු
+            </p>
+
+            <SelectField
+              label="23.වැඩිම කාලයක්  නිරතවන කාර්යය"
+              options={nirathawenaKaaryaya}
+              name={'වැඩිම කාලයක්  නිරතවන කාර්යය'}
+            />
+
+            <RadioButtonGroup
+              label="24. වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය :"
+              options={list_24}
+              name={'වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය'}
+            />
+
+            {(!!ans_24 || !list_24.length) &&
+              <Grid container spacing={0}>
+                <Grid item
+                  xs={6}
+                  sx={{ paddingRight: '10px' }}  >
+
+                  <SelectField
+                    name={"වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය"}
+                    label="25-A. වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය"
+                    options={list_25_a} />
+                  {(!ans_24 && !!list_24.length) && <FormHelperText>පළමුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය තෝරන්න</FormHelperText>}
+                </Grid>
+
+                <Grid item
+                  xs={6}>
+                  <SelectField
+                    name={"වැඩිම කාලයක් උගන්වන විෂය"}
+                    label="25-B. වැඩිම කාලයක් උගන්වන විෂය"
+                    options={list_25_b}
+                    disabled={!list_25_b.length} />
+                  {(!ans_25_a && !!list_25_a.length) && <FormHelperText>පළමුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය තෝරන්න</FormHelperText>}
+                </Grid>
+              </Grid>
+            }
+            <RadioButtonGroup
+              label="26. වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ මාධ්‍යය :"
+              options={[
+                'සිංහල මාධ්‍යය',
+                'දෙමළ මාධ්‍යය',
+                'ඉංග්‍රීසි මාධ්‍යය'
+              ]}
+              name={'වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ මාධ්‍යය'}
+            />
+            <TextFieldComponent label="27. වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ යෙදී සිටින කාලච්ඡේද ගණන (සතියකට) :"
+              name="වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ යෙදී සිටින කාලච්ඡේද ගණන (සතියකට)" />
+
+            <HorizontalLine />
+            <p style={{ fontSize: "22px", fontWeight: 'bold' }}>
+              දෙවනුව වැඩිම (Secondary) කාලයක් නිරත වන කාර්යය/උගන්වන විෂය පිළිබඳ තොරතුරු
+            </p>
+
+            <SelectField
+              label="28. දෙවනුව වැඩිම කාලයක්  නිරතවන කාර්යය"
+              options={['නිරත වන්නේ ප්‍රධාන කාර්යයක පමණි', ...nirathawenaKaaryaya]}
+              name={'දෙවනුව වැඩිම කාලයක් නිරතවන කාර්යය'}
+            />
+
+            <RadioButtonGroup
+              label="29. දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය"
+              options={list_29}
+              name={'දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය'}
+            />
+
+            {ans_29 != 'නිරත වන්නේ ප්‍රධාන කාර් යක පමණි' && <Grid container spacing={0}>
+              <Grid item
+                xs={6}
+                sx={{ paddingRight: '10px' }}  >
+
+                <SelectField
+                  name={"දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය"}
+                  label="30-A. වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය"
+                  options={list_30_a} />
+                {(!ans_29 && !!list_29.length) && <FormHelperText>පළමුව දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය තෝරන්න</FormHelperText>}
+              </Grid>
+
+              <Grid item
+                xs={6}>
+                <SelectField
+                  name={"දෙවනුව වැඩිම කාලයක් වැඩිම කාලයක් උගන්වන විෂය"}
+                  label="30-B. දෙවනුව වැඩිම කාලයක් වැඩිම කාලයක් උගන්වන විෂය"
+                  options={list_30_b}
+                  disabled={!list_30_b.length} />
+                {(!ans_30_a && !!list_30_a.length) && <FormHelperText>පළමුව දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය තෝරන්න</FormHelperText>}
+              </Grid>
+            </Grid>
+            }
+
+            {/* 
+<RadioButtonGroup
+label="28/29. දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය :"
+options={[
+'ප්‍රාථමික අංශය',
+'ද්විතීයික අංශය(6-11)',
+'උසස් පෙළ අංශය'
+]}
+name={'දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය'}
+/> */}
+            <RadioButtonGroup
+              label="31. දෙවනුව වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ මාධ්‍යය :"
+              options={[
+                'සිංහල මාධ්‍යය',
+                'දෙමළ මාධ්‍යය',
+                'ඉංග්‍රීසි මාධ්‍යය'
+              ]}
+              name={'දෙවනුව වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ මාධ්‍යය'}
+            />
+            <TextFieldComponent label="32. දෙවනුව වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ යෙදී සිටින කාලච්ඡේද ගණන (සතියකට) :"
+              name="දෙවනුව වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ යෙදී සිටින කාලච්ඡේද ගණන (සතියකට)" />
+
+          </Stack>
+        );
+
+      case 4:
+        return (
+          <Stack
+            direction="column"
+            justifyContent="space-between"
+            spacing={3}
+            sx={{ mb: 3 }}
+          >
+            <p style={{ fontSize: "22px", fontWeight: 'bold' }}>
+              අමතර තොරතුරු
+            </p>
+
+            <TextFieldComponent label="33. මෙම පාසලට පත් වුන /අනුයුක්ත වුන දිනය"
+              name="මෙම පාසලට පත් වුන /අනුයුක්ත වුන දිනය" />
+
+            {/* 
+                      <RadioButtonGroup
+                        label="27. අංශය"
+                        options={[
+                          'ප්‍රාථමික (1-5 ශ්‍රේණි) අංශය - 1',
+                          'ද්විතීයික (6-11 ශ්‍රේණි) අංශය - 2',
+                          'උසස් පෙළ (12-13 ශ්‍රේණි) අංශය - 3'
+                        ]}
+                        name={'අංශය'}
+                      /> 
+                      <CheckBoxGroup
+                        label="28. අංශය"
+                        options={anshaya}
+                        name={'අංශය'}
+                      />
+                       */}
+
+            <RadioButtonGroup
+              label="34. ඔබ ගුරු පුහුණු සහතිකයක් (ආයතනික/දුරස්ථ) ලබා තිබේද?"
+              options={['ඔව්', 'නැත']}
+              name={'ඔබ ගුරු පුහුණු සහතිකයක් (ආයතනික/දුරස්ථ) ලබා තිබේද'}
+            />
+
+
+            <RadioButtonGroup
+              label="35. ඔබ ජාතික ශික්ෂණ විද්‍යා ඩිප්ලෝමාවක් ලබා තිබේද?"
+              options={['ඔව්', 'නැත']}
+              name={'ඔබ ජාතික ශික්ෂණ විද්‍යා ඩිප්ලෝමාවක් ලබා තිබේද'}
+            />
+
+            <RadioButtonGroup
+              label="36. ඔබ අධ්‍යාපනවේදී (B Ed) උපාධියක් ලබා තිබේද?"
+              options={['ඔව්', 'නැත']}
+              name={'ඔබ අධ්‍යාපනවේදී (B Ed) උපාධියක් ලබා තිබේද'}
+            />
+
+            <RadioButtonGroup
+              label="37. ඔබ පශ්චාත් උපාධි අධ්‍යාපන ඩිප්ලෝමාවක් (Pg Dip) ලබා තිබේද?"
+              options={['ඔව්', 'නැත']}
+              name={'ඔබ පශ්චාත් උපාධි අධ්‍යාපන ඩිප්ලෝමාවක් (Pg Dip) ලබා තිබේද'}
+            />
+
+            <RadioButtonGroup
+              label="38. ඔබ අධ්‍යාපනය පිළිබඳ ශාස්ත්‍රපති උපාධිය (Masters) ලබා තිබේද?"
+              options={['ඔව්', 'නැත']}
+              name={'ඔබ අධ්‍යාපනය පිළිබඳ ශාස්ත්‍රපති උපාධිය (Masters) ලබා තිබේද'}
+            />
+
+            <RadioButtonGroup
+              label="39. පසුගිය පාසල් සංගණනය (2022) සඳහා තොරතුරු ලබා දෙන ලද්දේ"
+              options={[
+                'මෙම පාසලෙනි',
+                'වෙනත් පාසලකිනි',
+                'තොරතුරු ලබා දුන්නේ නැත'
+              ]}
+              name={'පසුගිය පාසල් සංගණනය (2022) සඳහා තොරතුරු ලබා දෙන ලද්දේ'}
+            />
+
+            <TextFieldComponent label="40. ජංගම දුරකථන අංකය-(ඉලක්කම් 10ක අංකය [උදාහරන 0701234567])" name="ජංගම දුරකථන අංකය" />
+            <TextFieldComponent label="41. ජාතික හැඳුනුම්පත් අංකය" name="ජාතික හැඳුනුම්පත් අංකය" />
+
+          </Stack>
+        );
+      case 5:
+        return (
+          <Stack
+            direction="column"
+            justifyContent="space-between"
+            spacing={3}
+            sx={{ mb: 3 }}
+          >
+            <p style={{ fontSize: "22px", fontWeight: 'bold' }}>
+              තොරතුරු යවන්න
+            </p>
+
+            ඔබ විසින් ඇතුලත් කරන තොරතුරු දෙපාර්තුමේන්තුවට ඉතාමත් වැදගත් බැවින් කරුණාකර තොරතුරු එවීමට පෙර එක් වරක් නැවත පරීක්ශා කරන්න.
+            <br /><br />
+
+            <CheckBoxGroup
+              label=""
+              options={[
+                'මෙහි දී සපයනු ලබන සියළු ම තොරතුරු සත්‍ය හා නිවැරදි බවට සහතික කරමි'
+              ]}
+              name={''}
+            />
+
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              onClick={() => handleSubmit(onSubmit)}
+            >
+              තොරතුරු යවන්න | Submit Information
+            </Button>
+          </Stack>
+        );
+      default:
+        return 'Unknown step';
+    }
+  }
+
+
   return (
     <>
       <Head>
@@ -287,9 +856,9 @@ const Page = () => {
       >
         <Grid
           item={true}
-          xl={7}
+          xl={9}
           xs={12}
-          lg={7}
+          lg={9}
           sx={{
             display: 'flex',
             flexDirection: 'column',
@@ -303,29 +872,7 @@ const Page = () => {
               py: 4
             }}
           >
-            <Dialog
-              open={open}
-              onClose={() => setOpen(false)}
-              aria-labelledby="alert-dialog-title"
-              aria-describedby="alert-dialog-description"
-            >
-              <DialogTitle id="alert-dialog-title">
-                {"තහවුරු කිරීම"}
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                  ඔබ විසින් ඇතුලත් කරන තොරතුරු දෙපාර්තුමේන්තුවට ඉතාමත් වැදගත් බැවින් කරුණාකර තොරතුරු එවීමට පෙර එක් වරක් නැවත පරීක්ශා කරන්න.
-                  <br /><br />
-                  ඉහත මා විසින් ඇතුලත් කරන ලද සියලු විස්තර සත්‍ය බවට සනාථ කරමි.
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setOpen(false)}>Close This</Button>
-                <Button onClick={handleSubmit(onSubmit)} autoFocus variant='outlined'>
-                  තොරතුරු යවන්න | Submit Information
-                </Button>
-              </DialogActions>
-            </Dialog>
+
 
             <Container maxWidth="xl">
               <Stack spacing={2}>
@@ -354,494 +901,45 @@ const Page = () => {
                     </p>
                     <FormProvider {...form}>
                       <form onSubmit={handleSubmit(onSubmit)}>
-                        <Stack
-                          direction="column"
-                          justifyContent="space-between"
-                          spacing={3}
-                          sx={{ mb: 3 }}
-                        >
-                          <p style={{ fontSize: "20px", fontWeight: 'bold' }}>
-                            {t('ඔබ දැනට සේවය කරන පාසල පිළිබඳ විස්තර')}
-                            <br />
-                            <span style={{ fontSize: "15px", fontWeight: '' }}>
-                              {t('(තාවකාලිකව අනුයුක්තව සිටින්නන් මෙහිදී වැටුප් ලේඛනයේ නම ඇතුළත් වන පාසල පිළිබඳව සඳහන් කළ යුතු වේ)')}
-                            </span>
-                          </p>
-                          <Grid container
-                          >
-                            <Grid item
-                              xs={4}>
-                              <SelectField name={"පළාත"}
-                                label={"පළාත"}
-                                options={provinces} />
-                            </Grid>
-
-                            <Grid item
-                              xs={4}>
-                              <SelectField name={"කලාපය"}
-                                label={"කලාපය"}
-                                options={zones} />
-                              {!selectedProvince && <FormHelperText>පළමුව පළාත තෝරන්න</FormHelperText>}
-                            </Grid>
-
-
-                            <Grid item
-                              xs={4}>
-                              <SelectField name={"කොට්ඨාශය"}
-                                label={"කොට්ඨාශය"}
-                                options={divisions} />
-                              {!selectedZone && <FormHelperText>පළමුව කලාපය තෝරන්න</FormHelperText>}
-                            </Grid>
-                          </Grid>
-                          <SelectField
-                            name={"පාසලේ නම සහ පාසල් සංගණන අංකය"}
-                            label="වැටුප් ලේඛනයේ නම ඇතුළත් වන පාසලේ නම සහ පාසල් සංගණන අංකය"
-                            options={schools?.map(s => s.name)}
-                          />
-                          <HorizontalLine />
-
-                          <p style={{ fontSize: "20px", fontWeight: 'bold' }}>
-                            පුද්ගල තොරතුරු
-                          </p>
-                          <TextFieldComponent label="01-A ජාතික හැඳුනුම්පත් අංකය" name="ජාතික හැඳුනුම්පත් අංකය" />
+                        <Box sx={{ margin: 'auto', marginTop: '50px' }}>
+                          <Stepper activeStep={activeStep}>
+                            {steps.map((label, index) => (
+                              <Step key={label}>
+                                <StepLabel>{label}</StepLabel>
+                              </Step>
+                            ))}
+                          </Stepper>
+                          <Box sx={{ mt: 2, mb: 2 }}>
+                            {activeStep === steps.length ? (
+                              <Box>
+                                <Typography>All steps completed - you&apos;re finished</Typography>
+                                <Button onClick={handleReset}>Reset</Button>
+                              </Box>
+                            ) : (
+                              <Box>
+                                {getStepContent(activeStep)}
+                                <Box sx={{ mt: 2 }}>
+                                  <Button
+                                    disabled={activeStep === 0}
+                                    onClick={handleBack}
+                                    sx={{ mr: 1 }}
+                                  >
+                                    Back
+                                  </Button>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleNext}
+                                  >
+                                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                  </Button>
+                                </Box>
+                              </Box>
+                            )}
+                          </Box>
+                        </Box>
 
 
-                          <TextFieldComponent label="01-B  අත්සන් ලේඛනයේ අංකය"
-                            name="අත්සන් ලේඛනයේ අංකය" />
-                          <TextFieldComponent label="01-C වැටුප් ලේඛනයේ අංකය"
-                            name="වැටුප් ලේඛනයේ අංකය" />
-                          <RadioButtonGroup
-                            name="තරාතිරම (Title)"
-                            label="02. තරාතිරම (Title) "
-                            options={[
-                              'Ven',
-                              'Rev. Fr/Sr',
-                              'Mr.',
-                              'Mrs.',
-                              'Ms.'
-                            ]}
-                          />
-                          <TextFieldComponent label="03-B. සම්පූර්ණ නම ඉංග්‍රීසියෙන්"
-                            name="සම්පූර්ණ නම" />
-                          <TextFieldComponent label="03-A. මුලකූරු සමග නම ඉංග්‍රීසියෙන්"
-                            name="මුලකූරු සමග නම" />
-
-
-                          <RadioButtonGroup
-                            name="මෙම පාසලේ දරණ තනතුර"
-                            label="04. මෙම පාසලේ දරණ තනතුර"
-                            options={[
-                              'විදුහල්පති',
-                              'වැ.බ. විදුහල්පති/විදුහල්පති වැඩ ආවර්ණය',
-                              'නියෝජ්‍ය විදුහල්පති/වැ.බ.නි.විදුහල්පති',
-                              'සහකාර විදුහල්පති/වැ.බ.ස. විදුහල්පති',
-                              'අංශ ප්‍රධානි/වැ.බ.අංශ ප්‍රධානි',
-                              'ශ්‍රේණි ප්‍රධානි',
-                              'ගුරු උපදේශක',
-                              'ගුරුවරයා',
-                              'ගුරු සහායක/ස්වේච්ඡා ගුරු'
-                            ]}
-                          />
-
-
-                          <RadioButtonGroup
-                            label="05. මෙම පාසලේ සේවය කරන පදනම වනුයේ"
-                            options={[
-                              'මෙම පාසලේ වැටුප් ලේඛනයට ඇතූළත් හා මෙම පාසලේම පූර්ණකාලීනව/අර්ධ කාලීනව සේවය කරන',
-                              'මෙම පාසලේ වැටුප් ලේඛනයට ඇතුළත් නමුත් වෙනත් පාසලකට තාවකාලිකව අනුයුක්තව සිටින',
-                              'මෙම පාසලේ වැටුප් ලේඛනයට ඇතුළත් නමුත් වෙනත් කාර්යාලයකට/ ආයතනයකට තාවකාලිකව අනුයුක්තව සිටින',
-                              'මෙම පාසලේ වැටුප් ලේඛනයට ඇතුළත් දැනට වැටුප් සහිත නිවාඩු ගොස් ඇති (විශ්‍රාම පූර්ව නිවාඩු ලබා ඇති/ප්‍රසූත නිවාඩු ගොස් ඇති/අධ්‍යයන නිවාඩු ලබා ඇති) ආදී',
-                              'මෙම පාසලේ වැටුප් ලේඛනයට ඇතුළත් දැනට වැටුප් රහිත නිවාඩු ගොස් ඇති/තාවකාලිකව වැඩ තහනම් වී ඇති'
-                            ]}
-                            name={'මෙම පාසලේ සේවය කරන පදනම වනුයේ'}
-                          />
-
-                          <TextFieldComponent label="06. උපන් දිනය-(YYYY-MM-DD [උදාහරන 1985-11-02])"
-                            name="උපන් දිනය" />
-                          <RadioButtonGroup
-                            label="07. ස්ත්‍රී පුරුෂ භාවය"
-                            options={[
-                              'පුරුෂ',
-                              'ස්ත්‍රී'
-                            ]}
-                            name={'ස්ත්‍රී පුරුෂ භාවය'}
-                          />
-
-                          <RadioButtonGroup
-                            label="08. ජන වර්ගය"
-                            options={[
-                              'සිංහල',
-                              'දෙමළ',
-                              'මුස්ලිම්',
-                              'වෙනත්'
-                            ]}
-                            name={'ජන වර්ගය'}
-                          />
-
-                          <RadioButtonGroup
-                            label="09. ආගම"
-                            options={[
-                              'බෞද්ධ',
-                              'හින්දු',
-                              'ඉස්ලාම්',
-                              'කතෝලික',
-                              'ක්‍රිස්තියානි',
-                              'වෙනත්'
-                            ]}
-                            name={'ආගම'}
-                          />
-                          <RadioButtonGroup
-                            label="10. වර්තමාන විවාහක තත්ත්වය"
-                            options={[
-                              'විවාහක',
-                              'අවිවාහක',
-                              'වැන්දඹු',
-                              'වෙනත්'
-                            ]}
-                            name={'වර්තමාන විවාහක තත්ත්වය'}
-                          />
-                          <HorizontalLine />
-                          <RadioButtonGroup
-                            label="11. ඉහළම අධ්‍යාපන සුදුසුකම"
-                            options={[
-                              'අ.පො.ස.(සා / පෙළ)ට අඩු',
-                              'අ.පො.ස.(සා / පෙළ) හෝ ඊට සමාන්තර (O/L)',
-                              'අ.පො.ස.(උ / පෙළ) හෝ ඊට සමාන්තර (A/L)',
-                              'උපාධි හෝ ඊට සමාන්තර (BA/BSc/BEd…)',
-                              'පශ්චාත් උපාධි ඩිප්ලෝමා හෝ ඊට සමාන්තර (PG Dip)',
-                              'පශ්චාත් උපාධි හෝ ඊට සමාන්තර (MA/MSc/MEd…)',
-                              'දර්ශනපති උපාධි හෝ ඊට සමාන්තර (MPhil)',
-                              'දර්ශනශූරී උපාධි හෝ ඊට සමාන්තර (PhD)'
-                            ]}
-                            name={'ඉහළම අධ්‍යාපන සුදුසුකම'}
-                          />
-
-                          <RadioButtonGroup
-                            label="12. අ.පො.ස. (උ/පෙළ) දී හැදෑරූ විෂය ධාරාව"
-                            options={[
-                              'ජීව විද්‍යා',
-                              'භෞතික විද්‍යා (ගණිත)',
-                              'කලා',
-                              'වාණිජ',
-                              'ජෛව පද්ධති තාක්ෂණවේදය',
-                              'ඉංජිනේරු තාක්ෂණවේදය',
-                              'පොදු විෂය ධාරාව'
-                            ]}
-                            name={'අ.පො.ස. (උ/පෙළ) දී හැදෑරූ විෂය ධාරාව'}
-                          />
-                          <RadioButtonGroup
-                            label="13. මූලික උපාධියක් ලබා ඇත්නම් එය අයත් ක්ෂේත්‍රය"
-                            options={[
-                              'අධ්‍යාපන',
-                              'ජීව විද්‍යා',
-                              'භෞතික විද්‍යා',
-                              'කලා',
-                              'කළමනාකරණ/ වාණිජ්‍ය',
-                              'කෘෂිකර්ම',
-                              'පරිගණක ආශ්‍රිත',
-                              'වෙනත්'
-
-                            ]}
-                            name={'මූලික උපාධියක් ලබා ඇත්නම් එය අයත් ක්ෂේත්‍රය'}
-                          />
-
-
-
-                          <p style={{ fontSize: "20px", fontWeight: 'bold' }}>ඉහළම වෘත්තීය සුදුසුකම</p>
-
-                          <Grid container spacing={0}>
-                            <Grid item
-                              xs={6}
-                              sx={{ paddingRight: '10px' }}  >
-                              <SelectField name={"ඉහළම වෘත්තීය සුදුසුකම අයත් කාණ්ඩය"}
-                                label={"14. ඉහළම වෘත්තීය සුදුසුකම අයත් කාණ්ඩය"}
-                                options={highestEducationCategories} />
-                            </Grid>
-
-                            <Grid item
-                              xs={6}>
-                              <SelectField name={"ඉහළම වෘත්තීය සුදුසුකම"}
-                                label={"15. ඉහළම වෘත්තීය සුදුසුකම"}
-                                options={highestEducations}
-                                disabled={!highestEducations.length} />
-                              {(!selectedHighestEducationCategory && !!highestEducations.length) && <FormHelperText>පළමුව ඉහළම වෘත්තීය සුදුසුකම අයත් කාණ්ඩය තෝරන්න</FormHelperText>}
-                            </Grid>
-                          </Grid>
-                          <HorizontalLine />
-                          <p style={{ fontSize: "20px", fontWeight: 'bold' }}>පත්වීම් වර්ගීකරණය</p>
-                          <Grid container spacing={0}>
-                            <Grid item
-                              xs={6}
-                              sx={{ paddingRight: '10px' }}  >
-
-                              <SelectField name={"පත්වීම් වර්ගීකරණය අනුව අයත්වන සේවාව"}
-                                label={"16. පත්වීම් වර්ගීකරණය අනුව අයත්වන සේවාව"}
-                                options={services} />
-                            </Grid>
-
-                            <Grid item
-                              xs={6}>
-                              <SelectField name={"වර් තමානයේ අයත්වන පන්තිය/හා ශ්‍රේණිය"}
-                                label={"17. වර් තමානයේ අයත්වන පන්තිය/හා ශ්‍රේණිය"}
-                                options={serviceClasses}
-                                disabled={!serviceClasses.length} />
-                              {(!selectedService && !!serviceClasses.length) && <FormHelperText>පළමුව පත්වීම් වර්ගීකරණය අනුව අයත්වන සේවාව තෝරන්න</FormHelperText>}
-                            </Grid>
-                          </Grid>
-
-
-                          <TextFieldComponent label="18. වර් තමාන පන්තියට/හා ශ්‍රේණියට පත් වූ/උසස් වූ දිනය-(YYYY-MM-DD [උදාහරන 1989-05-09])"
-                            name="වර්තමාන පන්තියට/හා ශ්‍රේණියට පත් වූ/උසස් වූ දිනය" />
-                          <TextFieldComponent label="19. වර් තමාන සේවයට පත් වූ දිනය-(YYYY-MM-DD [උදාහරන 2000-01-31])"
-                            name="වර්තමාන සේවයට පත් වූ දිනය" />
-                          <RadioButtonGroup
-                            label="20. වර් තමාන සේවයට පත් වූ භාෂා මාධ්‍යය"
-                            options={[
-                              'සිංහල මාධ්‍යය',
-                              'දෙමළ මාධ්‍යය',
-                              'ඉංග්‍රීසි මාධ්‍යය'
-                            ]}
-                            name={'වර්තමාන සේවයට පත් වූ භාෂා මාධ්‍යය'}
-                          />
-                          <HorizontalLine />
-                          <p style={{ fontSize: "20px", fontWeight: 'bold' }}>පත්වීම් විෂය</p>
-
-                          <RadioButtonGroup
-                            label="21. පත්වීම් විෂය අයත්වන අංශය"
-                            options={list_21}
-                            name={'පත්වීම් විෂය අයත්වන අංශය'}
-                          />
-
-                          <Grid container spacing={0}>
-                            <Grid item
-                              xs={6}
-                              sx={{ paddingRight: '10px' }}  >
-
-                              <SelectField
-                                name={"පත්වීම් විෂය අයත්වන කාණ්ඩය"}
-                                label="22.A. පත්වීම් විෂය අයත්වන කාණ්ඩය"
-                                options={list_22_a} />
-                              {(!ans_21 && !!list_21.length) && <FormHelperText>පළමුව පත්වීම් විෂය තෝරන්න</FormHelperText>}
-                            </Grid>
-
-                            <Grid item
-                              xs={6}>
-                              <SelectField
-                                name={"පත්වීම් විෂය"}
-                                label="22.B. පත්වීම් විෂය"
-                                options={list_22_b}
-                                disabled={!list_22_b.length} />
-                              {(!ans_22_a && !!list_22_a.length) && <FormHelperText>පළමුව පත්වීම් විෂය අයත්වන කාණ්ඩය තෝරන්න</FormHelperText>}
-                            </Grid>
-                          </Grid>
-                          <HorizontalLine />
-
-                          <p style={{ fontSize: "22px", fontWeight: 'bold' }}>
-                            වැඩිම කාලයක් හා දෙවනුව වැඩිම කාලයක් උගන්වන විෂයයන් පිළිබඳ තොරතුරු
-                          </p>
-
-                          <SelectField
-                            label="23.වැඩිම කාලයක්  නිරතවන කාර්යය"
-                            options={nirathawenaKaaryaya}
-                            name={'වැඩිම කාලයක්  නිරතවන කාර්යය'}
-                          />
-
-                          <RadioButtonGroup
-                            label="24. වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය :"
-                            options={list_24}
-                            name={'වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය'}
-                          />
-
-                          {(!!ans_24 || !list_24.length) &&
-                            <Grid container spacing={0}>
-                              <Grid item
-                                xs={6}
-                                sx={{ paddingRight: '10px' }}  >
-
-                                <SelectField
-                                  name={"වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය"}
-                                  label="25-A. වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය"
-                                  options={list_25_a} />
-                                {(!ans_24 && !!list_24.length) && <FormHelperText>පළමුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය තෝරන්න</FormHelperText>}
-                              </Grid>
-
-                              <Grid item
-                                xs={6}>
-                                <SelectField
-                                  name={"වැඩිම කාලයක් උගන්වන විෂය"}
-                                  label="25-B. වැඩිම කාලයක් උගන්වන විෂය"
-                                  options={list_25_b}
-                                  disabled={!list_25_b.length} />
-                                {(!ans_25_a && !!list_25_a.length) && <FormHelperText>පළමුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය තෝරන්න</FormHelperText>}
-                              </Grid>
-                            </Grid>
-                          }
-                          <RadioButtonGroup
-                            label="26. වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ මාධ්‍යය :"
-                            options={[
-                              'සිංහල මාධ්‍යය',
-                              'දෙමළ මාධ්‍යය',
-                              'ඉංග්‍රීසි මාධ්‍යය'
-                            ]}
-                            name={'වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ මාධ්‍යය'}
-                          />
-                          <TextFieldComponent label="27. වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ යෙදී සිටින කාලච්ඡේද ගණන (සතියකට) :"
-                            name="වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ යෙදී සිටින කාලච්ඡේද ගණන (සතියකට)" />
-
-                          <HorizontalLine />
-                          <p style={{ fontSize: "22px", fontWeight: 'bold' }}>
-                            දෙවනුව වැඩිම (Secondary) කාලයක් නිරත වන කාර්යය/උගන්වන විෂය පිළිබඳ තොරතුරු
-                          </p>
-
-                          <SelectField
-                            label="28. දෙවනුව වැඩිම කාලයක්  නිරතවන කාර්යය"
-                            options={['නිරත වන්නේ ප්‍රධාන කාර්යයක පමණි', ...nirathawenaKaaryaya]}
-                            name={'දෙවනුව වැඩිම කාලයක් නිරතවන කාර්යය'}
-                          />
-
-                          <RadioButtonGroup
-                            label="29. දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය"
-                            options={list_29}
-                            name={'දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය'}
-                          />
-
-                          {ans_29 != 'නිරත වන්නේ ප්‍රධාන කාර් යක පමණි' && <Grid container spacing={0}>
-                            <Grid item
-                              xs={6}
-                              sx={{ paddingRight: '10px' }}  >
-
-                              <SelectField
-                                name={"දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය"}
-                                label="30-A. වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය"
-                                options={list_30_a} />
-                              {(!ans_29 && !!list_29.length) && <FormHelperText>පළමුව දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය තෝරන්න</FormHelperText>}
-                            </Grid>
-
-                            <Grid item
-                              xs={6}>
-                              <SelectField
-                                name={"දෙවනුව වැඩිම කාලයක් වැඩිම කාලයක් උගන්වන විෂය"}
-                                label="30-B. දෙවනුව වැඩිම කාලයක් වැඩිම කාලයක් උගන්වන විෂය"
-                                options={list_30_b}
-                                disabled={!list_30_b.length} />
-                              {(!ans_30_a && !!list_30_a.length) && <FormHelperText>පළමුව දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන කාණ්ඩය තෝරන්න</FormHelperText>}
-                            </Grid>
-                          </Grid>
-                          }
-
-                          {/* 
-                      <RadioButtonGroup
-                        label="28/29. දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය :"
-                        options={[
-                          'ප්‍රාථමික අංශය',
-                          'ද්විතීයික අංශය(6-11)',
-                          'උසස් පෙළ අංශය'
-                        ]}
-                        name={'දෙවනුව වැඩිම කාලයක් උගන්වන විෂය අයත් වන අංශය'}
-                      /> */}
-                          <RadioButtonGroup
-                            label="31. දෙවනුව වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ මාධ්‍යය :"
-                            options={[
-                              'සිංහල මාධ්‍යය',
-                              'දෙමළ මාධ්‍යය',
-                              'ඉංග්‍රීසි මාධ්‍යය'
-                            ]}
-                            name={'දෙවනුව වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ මාධ්‍යය'}
-                          />
-                          <TextFieldComponent label="32. දෙවනුව වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ යෙදී සිටින කාලච්ඡේද ගණන (සතියකට) :"
-                            name="දෙවනුව වැඩිම කාලයක් උගන්වන විෂය ඉගැන්වීමේ යෙදී සිටින කාලච්ඡේද ගණන (සතියකට)" />
-
-                          <HorizontalLine />
-                          <TextFieldComponent label="33. මෙම පාසලට පත් වුන /අනුයුක්ත වුන දිනය"
-                            name="මෙම පාසලට පත් වුන /අනුයුක්ත වුන දිනය" />
-
-
-
-                          {/* 
-                      <RadioButtonGroup
-                        label="27. අංශය"
-                        options={[
-                          'ප්‍රාථමික (1-5 ශ්‍රේණි) අංශය - 1',
-                          'ද්විතීයික (6-11 ශ්‍රේණි) අංශය - 2',
-                          'උසස් පෙළ (12-13 ශ්‍රේණි) අංශය - 3'
-                        ]}
-                        name={'අංශය'}
-                      /> 
-                      <CheckBoxGroup
-                        label="28. අංශය"
-                        options={anshaya}
-                        name={'අංශය'}
-                      />
-                       */}
-
-                          <RadioButtonGroup
-                            label="34. ඔබ ගුරු පුහුණු සහතිකයක් (ආයතනික/දුරස්ථ) ලබා තිබේද?"
-                            options={['ඔව්', 'නැත']}
-                            name={'ඔබ ගුරු පුහුණු සහතිකයක් (ආයතනික/දුරස්ථ) ලබා තිබේද'}
-                          />
-
-
-                          <RadioButtonGroup
-                            label="35. ඔබ ජාතික ශික්ෂණ විද්‍යා ඩිප්ලෝමාවක් ලබා තිබේද?"
-                            options={['ඔව්', 'නැත']}
-                            name={'ඔබ ජාතික ශික්ෂණ විද්‍යා ඩිප්ලෝමාවක් ලබා තිබේද'}
-                          />
-
-                          <RadioButtonGroup
-                            label="36. ඔබ අධ්‍යාපනවේදී (B Ed) උපාධියක් ලබා තිබේද?"
-                            options={['ඔව්', 'නැත']}
-                            name={'ඔබ අධ්‍යාපනවේදී (B Ed) උපාධියක් ලබා තිබේද'}
-                          />
-
-                          <RadioButtonGroup
-                            label="37. ඔබ පශ්චාත් උපාධි අධ්‍යාපන ඩිප්ලෝමාවක් (Pg Dip) ලබා තිබේද?"
-                            options={['ඔව්', 'නැත']}
-                            name={'ඔබ පශ්චාත් උපාධි අධ්‍යාපන ඩිප්ලෝමාවක් (Pg Dip) ලබා තිබේද'}
-                          />
-
-                          <RadioButtonGroup
-                            label="38. ඔබ අධ්‍යාපනය පිළිබඳ ශාස්ත්‍රපති උපාධිය (Masters) ලබා තිබේද?"
-                            options={['ඔව්', 'නැත']}
-                            name={'ඔබ අධ්‍යාපනය පිළිබඳ ශාස්ත්‍රපති උපාධිය (Masters) ලබා තිබේද'}
-                          />
-
-                          <RadioButtonGroup
-                            label="39. පසුගිය පාසල් සංගණනය (2022) සඳහා තොරතුරු ලබා දෙන ලද්දේ"
-                            options={[
-                              'මෙම පාසලෙනි',
-                              'වෙනත් පාසලකිනි',
-                              'තොරතුරු ලබා දුන්නේ නැත'
-                            ]}
-                            name={'පසුගිය පාසල් සංගණනය (2022) සඳහා තොරතුරු ලබා දෙන ලද්දේ'}
-                          />
-
-                          <TextFieldComponent label="40. ජංගම දුරකථන අංකය-(ඉලක්කම් 10ක අංකය [උදාහරන 0701234567])" name="ජංගම දුරකථන අංකය" />
-                          <TextFieldComponent label="41. ජාතික හැඳුනුම්පත් අංකය" name="ජාතික හැඳුනුම්පත් අංකය" />
-
-                          <CheckBoxGroup
-                            label=""
-                            options={[
-                              'මෙහි දී සපයනු ලබන සියළු ම තොරතුරු සත්‍ය හා නිවැරදි බවට සහතික කරමි'
-                            ]}
-                            name={''}
-                          />
-
-                        </Stack>
-                        <p style={{ fontWeight: 'bold' }}>ඔබ විසින් ඇතුලත් කරන තොරතුරු දෙපාර්තුමේන්තුවට ඉතාමත් වැදගත් බැවින් කරුණාකර තොරතුරු එවීමට පෙර එක් වරක් නැවත පරීක්ශා කරන්න.</p>
-                        <Stack
-                          direction={'row'}
-                          justifyContent={'flex-end'}
-                        >
-
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            type="button"
-                            onClick={() => setOpen(true)}
-                          >
-                            තොරතුරු යවන්න | Submit Information
-                          </Button>
-                        </Stack>
                       </form>
                     </FormProvider>
                   </CardContent>
