@@ -1,11 +1,12 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 import { verifyAccessToken } from '../lib/auth'
-import { School, User } from '../database/schema'
+import { User } from '../database/schema'
 import { User as IUser } from '../lib/types/auth'
 
 export type AuthOptions = {
   redirectTo?: string
 }
+
 
 // Create a getServerSideProps utility function called "withAuth" to check user
 const withAuth = async <T extends Object = any>(
@@ -30,11 +31,7 @@ const withAuth = async <T extends Object = any>(
   return verifyAccessToken(token)
     .then(async decoded => {
       // Now, check if user has done 2 factor authentication
-      const user = await User.findById(decoded._id).lean()
-
-      if (user.schoolCode) {
-        user.school = await School.find({ schoolCode: decoded.schoolCode })
-      }
+      const user = await User.findById(decoded._id).populate('school')
 
       if (!user) {
         return {
@@ -44,11 +41,10 @@ const withAuth = async <T extends Object = any>(
           },
         }
       } else {
-        return onSuccess(user)
+        return onSuccess(user.toJSON({flattenObjectIds: true}))
       }
     })
     .catch(err => {
-      console.log(err)
       return {
         redirect: {
           destination: '/school-admin/login',

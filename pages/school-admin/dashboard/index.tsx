@@ -17,98 +17,110 @@ import {
     Stack,
     Divider,
     Alert,
+    LinearProgress,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from '@mui/material';
-import { FiEdit, FiTrash } from 'react-icons/fi';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { FiTrash } from 'react-icons/fi';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { GetServerSidePropsContext } from 'next';
 import withAuth from '../../../util/withAuth';
+import { ISchool, IUser } from '../../../database/schema';
+import useToast from '../../../hooks/use-snackbar';
 
 type Teacher = {
-    id: number;
+    _id: number;
     nic: string;
     name: string;
-    subject: string;
+    gender: string;
 };
 
 type FormValues = {
     nic: string;
     name: string;
-    subject: string;
+    gender: string;
 };
 
 const validationSchema = Yup.object().shape({
     nic: Yup.string().required('NIC is required'),
     name: Yup.string().required('Name is required'),
-    subject: Yup.string().required('Subject is required'),
+    gender: Yup.string().required('Gender is required'),
 });
 
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => withAuth(context, async (user) => {
-    console.log(user)
     return {
         props: {
-            
+            authUser: user
         },
     };
 });
 
 
-export default function Home() {
+export default function Home(props: { authUser: IUser }) {
+    const school = props.authUser.school as ISchool
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [editMode, setEditMode] = useState(false);
     const [currentId, setCurrentId] = useState<number | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
 
-    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormValues>({
+    const toast = useToast();
+
+    const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<FormValues>({
         resolver: yupResolver(validationSchema),
         mode: 'onBlur',
         reValidateMode: 'onBlur',
     });
 
-    useEffect(() => {
-        fetch('/api/teachers')
+    const retrieveTeachers = async () => {
+        setLoading(true)
+        await fetch(`/api/schools/${school.code}/teachers`)
             .then(res => res.json())
-            .then(data => setTeachers(data));
+            .then(res => setTeachers(res.data)).finally(() => {
+                setLoading(false)
+            });
+
+    }
+
+    useEffect(() => {
+        retrieveTeachers()
     }, []);
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
-        if (editMode) {
-            await fetch(`/api/teachers/${currentId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-            setEditMode(false);
-            setCurrentId(null);
-        } else {
-            await fetch('/api/teachers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-        }
+
+        await fetch(`/api/schools/${school.code}/teachers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+
         reset();
-        fetch('/api/teachers')
-            .then(res => res.json())
-            .then(data => setTeachers(data));
+        await retrieveTeachers();
+
+        toast.showSnackbar(`Teacher with name ${data.name} was successfully added`, {}, 'success');
     };
 
-    const handleEdit = (teacher: Teacher) => {
-        setValue('nic', teacher.nic);
-        setValue('name', teacher.name);
-        setValue('subject', teacher.subject);
-        setEditMode(true);
-        setCurrentId(teacher.id);
-    };
+
+    // const handleEdit = (teacher: Teacher) => {
+    //     setValue('nic', teacher.nic);
+    //     setValue('name', teacher.name);
+    //     setValue('gender', teacher.gender);
+    //     setEditMode(true);
+    //     setCurrentId(teacher.id);
+    // };
 
     const handleDelete = async (id: number) => {
-        await fetch(`/api/teachers/${id}`, {
-            method: 'DELETE',
-        });
-        fetch('/api/teachers')
-            .then(res => res.json())
-            .then(data => setTeachers(data));
+        if (confirm('Do you really want to delete this teacher?')) {
+            await fetch(`/api/schools/${school.code}/teachers/${id}`, {
+                method: 'DELETE',
+            });
+            retrieveTeachers()
+        }
+
     };
 
     return (
@@ -140,14 +152,13 @@ export default function Home() {
                                 <Typography variant="h5">
                                     පාසල් සංගණනය - 2024 | பள்ளிக் கணக்கெடுப்பு - 2024
                                 </Typography>
-
                                 <Typography variant="body2">
                                     අධ්‍යාපන අමාත්‍යාංශය | கல்வி அமைச்சு
                                 </Typography>
-
                                 <Typography variant="body2">
                                     ගුරුවරුන්ගේ තොරතුරු ඇතුලත් කිරීමේ ආකෘති පත්‍රය (2024) | ஆசிரியர் தகவல் நுழைவு படிவம் (2024)
                                 </Typography>
+                                <Typography sx={{ fontWeight: 'bold' }}>{school.name}</Typography>
                             </Stack>
                             <Divider variant="middle" sx={{ m: 2 }} />
 
@@ -175,13 +186,31 @@ export default function Home() {
                                             error={!!errors.name}
                                             helperText={errors.name ? errors.name.message : ''}
                                         />
-                                        <TextField
-                                            label="Subject"
-                                            variant="outlined"
-                                            {...register('subject')}
-                                            error={!!errors.subject}
-                                            helperText={errors.subject ? errors.subject.message : ''}
-                                        />
+
+                                        <FormControl fullWidth variant="outlined" margin="normal">
+                                            <InputLabel id="gender-label">Gender</InputLabel>
+                                            <Controller
+                                                name="gender"
+                                                control={control}
+                                                defaultValue=""
+                                                render={({ field }) => (
+                                                    <Select
+                                                        labelId="gender-label"
+                                                        id="gender"
+                                                        label="Gender"
+                                                        {...field}
+                                                    >
+                                                        <MenuItem value="">
+                                                            <em>None</em>
+                                                        </MenuItem>
+                                                        <MenuItem value="Male">Male</MenuItem>
+                                                        <MenuItem value="Female">Female</MenuItem>
+                                                        <MenuItem value="Other">Other</MenuItem>
+                                                    </Select>
+                                                )}
+                                            />
+                                        </FormControl>
+
                                         <Button type="submit" variant="contained" color="primary">
                                             {editMode ? 'Update' : 'Add'} Teacher
                                         </Button>
@@ -189,13 +218,15 @@ export default function Home() {
                                 </Grid>
                                 <Grid item xs={12} md={8}>
                                     <Alert sx={{ mb: 2 }}>ඔබගේ පාසලේ සේවයේ නිරත ගුරුවරු <b>පමණක්</b> ඇතුලත් කරන්න
-                                        <br /> உங்கள் பள்ளியில் உள்ள ஆசிரியர்களை மட்டும் உள்ளிடவும்</Alert>
+                                        <br /> உங்கள் பள்ளியில் உள்ள ஆசிரியர்களை மட்டும் உள்ளிடவும்
+                                    </Alert>
+                                    {loading && <LinearProgress />}
                                     <Table>
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>NIC</TableCell>
                                                 <TableCell>Name</TableCell>
-                                                <TableCell>Subject</TableCell>
+                                                <TableCell>Gender</TableCell>
                                                 <TableCell>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
@@ -207,15 +238,15 @@ export default function Home() {
                                                     </TableCell>
                                                 </TableRow>
                                             ) : (teachers.map((teacher) => (
-                                                <TableRow key={teacher.id}>
+                                                <TableRow key={teacher._id}>
                                                     <TableCell>{teacher.nic}</TableCell>
                                                     <TableCell>{teacher.name}</TableCell>
-                                                    <TableCell>{teacher.subject}</TableCell>
+                                                     <TableCell>{teacher.gender}</TableCell>
                                                     <TableCell>
-                                                        <IconButton onClick={() => handleEdit(teacher)}>
+                                                        {/* <IconButton onClick={() => handleEdit(teacher)}>
                                                             <FiEdit />
-                                                        </IconButton>
-                                                        <IconButton onClick={() => handleDelete(teacher.id)}>
+                                                        </IconButton> */}
+                                                        <IconButton onClick={() => handleDelete(teacher._id)}>
                                                             <FiTrash />
                                                         </IconButton>
                                                     </TableCell>
@@ -228,6 +259,7 @@ export default function Home() {
                             </Grid>
                         </CardContent>
                     </Card>
+
                     <Typography sx={{ marginTop: '10px' }} variant="body2" color="text.secondary" align="center">
                         {'Copyright © 2024 Statistic Branch, Ministry of Education. All Rights Reserved.'}
                     </Typography>

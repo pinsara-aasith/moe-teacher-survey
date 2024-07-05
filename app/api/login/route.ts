@@ -1,6 +1,6 @@
 import * as auth from '../../../lib/auth'
 import { UserSession } from '../../../lib/types/auth'
-import { User } from '../../../database/schema'
+import { School, User } from '../../../database/schema'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -28,7 +28,11 @@ export async function POST(req: NextRequest) {
   let errorMessage = null;
 
   if (role == 'school-admin') {
-    user = await User.findOne({ schoolCode, role: 'school-admin' })
+    const school = await School.findOne({ code: schoolCode })
+    if (school) {
+      user = await User.findOne({ school: school._id, role: 'school-admin' })
+    }
+
     if (!user) {
       errorMessage = 'Invalid school code or password!'
     }
@@ -52,7 +56,7 @@ export async function POST(req: NextRequest) {
   if (await auth.verifyPassword(password, user.password)) {
     const session: UserSession = {
       _id: user._id as string,
-      schoolCode: schoolCode,
+      school: schoolCode,
       email: user.email,
       name: user.name,
       role: user.role,

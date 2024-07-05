@@ -41,7 +41,7 @@ async function migrateData() {
         await Promise.all(schoolAdminsData.map(async (sA) => {
             console.log(`Adding admin for school ${sA.schoolCode}`)
             let school = await findOne('schools', { code: sA.schoolCode })
-            
+
             if (!school) {
                 console.error(`School not found:  ${sA.schoolCode}`)
                 return;
@@ -50,12 +50,13 @@ async function migrateData() {
                 email: null,
                 school: school._id,
                 password: sA.password,
-                name: schoolsData.find(s => s.code == sA.schoolCode)?.name,
+                name: school?.name,
                 role: 'school-admin',
                 refreshToken: null,
             }
 
-            await usersCollection.replaceOne({ data }, { ...sA, }, { upsert: true })
+            await usersCollection.replaceOne({ school: school._id }, { ...data }, { upsert: true })
+            console.log(`Admin added for school ${sA.schoolCode}`)
         }));
 
         console.log('Data migrated successfully!');

@@ -35,6 +35,15 @@ interface IPost extends Document {
   downvotes: number;
 }
 
+// Define TypeScript interfaces for your models
+interface ITeacher extends Document {
+  name: string;
+  nic: string;
+  gender: string;
+  school: ISchool;
+}
+
+interface ISurveyRecord extends Document { }
 
 const SchoolSchema: Schema<ISchool> = new Schema({
   code: { type: String, unique: true, required: true, trim: true },
@@ -72,13 +81,25 @@ const PostSchema: Schema<IPost> = new Schema({
   downvotes: { type: Number, default: 0 },
 });
 
+// Post Schema
+const TeacherSchema: Schema<ITeacher> = new Schema({
+  name: { type: String },
+  nic: { type: String },
+  gender: { type: String },
+  school:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "School",
+    unique: false, required: false, index: true
+  },
+});
 
 // Create models
 const School: Model<ISchool> = mongoose.models.School || mongoose.model<ISchool>('School', SchoolSchema);
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const Teacher: Model<ITeacher> = mongoose.models.Teacher || mongoose.model<ITeacher>('Teacher', TeacherSchema);
 const Post: Model<IPost> = mongoose.models.Post || mongoose.model<IPost>('Post', PostSchema);
 
 
-export { User, Post, School, Role };
-export type { IUser, IPost, ISchool };
+export { User, Post, School, Role, Teacher };
+export type { IUser, IPost, ISchool, ITeacher };
 

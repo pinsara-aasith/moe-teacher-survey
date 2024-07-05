@@ -57,7 +57,7 @@ const refreshRoute = async (
       } else {
         const session: UserSession = {
           _id: user.id,
-          schoolCode: user.schoolCode,
+          school: user.school,
           email: user.email,
           role: user.role,
           name: user.name,
