@@ -5,8 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   try {
     const schools = await School.find({});
-    NextResponse.json(schools, { status: 200 });
+    return NextResponse.json(schools, { status: 200 });
   } catch (error) {
-    NextResponse.json({ error: 'Failed to fetch schools' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch schools' }, { status: 500 });
   }
 }
