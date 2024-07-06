@@ -22,6 +22,7 @@ jobs:
           git status
           cd /home/census2/moe-teacher-survey && npm install
           cd /home/census2/moe-teacher-survey && npm run build
+          pm2 stop all
           pm2 delete all
           pm2 startOrRestart ecosystem.config.js --env production
           pm2 save
