@@ -33,7 +33,7 @@ function App(props: AppProps & { emotionCache: EmotionCache }) {
       <CacheProvider value={emotionCache}>
         <Head>
           <title>
-            Education Form
+            MOE Teacher Survey
           </title>
           <link rel="icon" type="image/png" href="./favicon.png" />
           <meta

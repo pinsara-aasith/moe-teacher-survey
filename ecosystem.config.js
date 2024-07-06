@@ -3,7 +3,7 @@ module.exports = {
     {
       "name": "MOE ",
       "exec_mode": "cluster",
-      "instances": 10,
+      "instances": 6,
       "cwd": "./moe-teacher-survey/",
       "script": "./node_modules/next/dist/bin/next",
       "args": "start",
