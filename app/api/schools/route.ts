@@ -2,7 +2,7 @@
 import { School } from '../../../database/schema';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const schools = await School.find({});
     return NextResponse.json(schools, { status: 200 });

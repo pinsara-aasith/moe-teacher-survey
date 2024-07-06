@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
-import { Box, Card, CardContent, Container, Paper, Grid, Stack, Typography, Link } from '@mui/material';
+import { Box, Card, CardContent, Container, Paper, Grid, Stack, Typography, Link, Button } from '@mui/material';
 import Image from 'next/image';
 import NextLink from 'next/link';
 
@@ -35,7 +35,7 @@ const Page: React.FC = () => {
         }}
       >
         <Grid
-        item={true}
+          item={true}
           xl={7}
           xs={12}
           lg={7}
@@ -112,6 +112,16 @@ const Page: React.FC = () => {
                       ))}
                     </Grid>
                   </Stack>
+                  <Button
+                    sx={{ mt: 2 }}
+                    type="submit"
+                    variant="outlined"
+                    color="primary"
+                    fullWidth
+                    href={`school-admin/login`}
+                    LinkComponent={NextLink}>
+                    Go to the login for school admins
+                  </Button>
 
                 </CardContent>
               </Card>

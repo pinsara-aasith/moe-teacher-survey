@@ -35,7 +35,7 @@ function App(props: AppProps & { emotionCache: EmotionCache }) {
           <title>
             MOE Teacher Survey
           </title>
-          <link rel="icon" type="image/png" href="./favicon.png" />
+          <link rel="icon" type="image/png" href="/favicon.png" />
           <meta
             name="viewport"
             content="initial-scale=1, width=device-width"
