@@ -1,11 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { withMiddlewares } from '../../middlewares'
 
 import {
-  authMiddleware,
   NextRequestWithUser,
-} from '../../middlewares/auth-middleware'
-import { User } from '../../database/schema'
+} from '../../lib/checkIfAuthenticated'
+// import { User } from '../../database/schema'
 import { NextApiRequest } from 'next'
 
 const twoFactorAuthRoute = async (
@@ -13,7 +11,7 @@ const twoFactorAuthRoute = async (
   res: NextApiRequest
 ) => {
   // Extract email and password from request body
-  const { token } = req.body as { token: string }
+  // const { token } = req.body as { token: string }
 
   // If email or password is not present, return a 400 response
   // if (!token) {
@@ -24,7 +22,7 @@ const twoFactorAuthRoute = async (
   // }
 
   // Now, look for user in db
-  const user = await User.findById(req.user._id)
+  // const user = await User.findById(req.user._id)
 
   // If user does not exist, return a 401 response
   // if (!user) {
@@ -55,4 +53,4 @@ const twoFactorAuthRoute = async (
   // }
 }
 
-export default withMiddlewares(authMiddleware, twoFactorAuthRoute)
+// export default withMiddlewares(authMiddleware, twoFactorAuthRoute)

@@ -1,61 +1,45 @@
-import { NextResponse } from 'next'
+// app/api/refresh/route.ts
+
+
+import { NextResponse } from 'next/server'
 import { verifyToken } from '../../lib/jwt'
-
-import { withMiddlewares } from '../../middlewares'
-import { NextRequestWithUser } from '../../middlewares/auth-middleware'
-import { generateAccessToken } from '../../lib/auth'
-import { ApiResponse } from '../../lib/types/api'
-import { UserSession } from '../../lib/types/auth'
 import { User } from '../../database/schema'
+import { generateAccessToken } from '../../lib/auth'
 
-export type RefreshApiResponse = ApiResponse<{
-  token: string
-}>
-
-const refreshRoute = async (
-  req: NextRequestWithUser,
-  res: NextResponse<RefreshApiResponse>
-) => {
-  // Read refresh token from body
-  const { refreshToken } = req.body
-
-  // If refresh token is not present, return a 400 response
-  if (!refreshToken) {
-    return res.status(400).json({
-      success: false,
-      message: 'Missing refresh token',
-    })
-  }
-
-  // Ok, decode JWT to get user infos
+export async function POST(req: Request) {
   try {
+    const { refreshToken } = await req.json()
+
+    if (!refreshToken) {
+      return NextResponse.json({
+        success: false,
+        message: 'Missing refresh token',
+      }, { status: 400 })
+    }
+
     const decoded = await verifyToken(
       refreshToken,
       process.env.JWT_REFRESH_TOKEN_SECRET as string
     )
 
-    // Check if refresh token is valid
     if (decoded) {
       const user = await User.findOne({
         _id: decoded._id,
         email: decoded.email,
       })
 
-
-      // If user does not exist, return a 401 response
       if (!user) {
-        return res.status(401).json({
+        return NextResponse.json({
           success: false,
           message: 'Invalid refresh token',
-        })
-      } else if (user.refreshToken != refreshToken) {
-        // If refresh token does not match, return a 401 response
-        return res.status(401).json({
+        }, { status: 401 })
+      } else if (user.refreshToken !== refreshToken) {
+        return NextResponse.json({
           success: false,
           message: 'Refresh token mismatch',
-        })
+        }, { status: 401 })
       } else {
-        const session: UserSession = {
+        const session = {
           _id: user.id,
           school: user.school,
           email: user.email,
@@ -63,29 +47,23 @@ const refreshRoute = async (
           name: user.name,
         }
 
-        // If user exists, generate new access token
         const token = generateAccessToken(session)
 
-        // return new access token
-        return res.status(200).json({
+        return NextResponse.json({
           success: true,
           data: {
             token,
           },
-        })
+        }, { status: 200 })
       }
     } else {
-      // Trigger error manually
       throw new Error('Invalid refresh token')
     }
   } catch (e) {
     console.log(e)
-    // If they don't match, return a 401 response
-    return res.status(401).json({
+    return NextResponse.json({
       success: false,
       message: 'Invalid refresh token',
-    })
+    }, { status: 401 })
   }
 }
-
-export default withMiddlewares(refreshRoute)

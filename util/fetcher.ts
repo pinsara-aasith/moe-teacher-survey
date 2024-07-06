@@ -1,5 +1,4 @@
 import Cookie from 'cookie-universal'
-import { RefreshApiResponse } from '../pages/login/login'
 
 /**
  * Fetcher is a wrapper around fetch that adds the necessary headers and handles token refresh
@@ -28,7 +27,7 @@ const fetcher = <T>(url: string, isRetrying = false): Promise<T> =>
           },
           body: JSON.stringify({ refreshToken }),
         })
-          .then(refreshRes => refreshRes.json() as Promise<RefreshApiResponse>)
+          .then(refreshRes => refreshRes.json() as Promise<any>)
           .then(refreshRes => {
             if (refreshRes.success && refreshRes.data) {
               // Update the new access token in cookies

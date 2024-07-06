@@ -6,7 +6,7 @@ import { Controller, useFormContext } from "react-hook-form";
 interface SelectFieldProps {
   label: string;
   options: string[];
-  name?: string;
+  name: string;
   disabled?: boolean;
   multiple?: boolean;
   renderValue?: (selected: any) => React.ReactNode;
@@ -29,7 +29,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
   const { t } = useTranslation();
 
   // Use the label as the default name if none is provided
-  name = name || label;
+  name = (name || label) as string;
 
   return (
     <Controller

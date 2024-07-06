@@ -1,8 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { UserSession } from '../../lib/types/auth'
 import { LoginApiResponse } from '../../pages/school-admin/login/login'
-import { RefreshApiResponse } from '../../app/api/refresh'
-
 
 
 interface AuthContextData {
@@ -139,31 +137,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Send API request to refresh endpoint
     return new Promise<void>((resolve, reject) => {
-      fetch('/api/refresh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken }),
-      })
-        .then(res => res.json() as Promise<RefreshApiResponse>)
-        .then(res => {
-          if (res.success && res.data) {
-            // Overwrite current token with new one
-            document.cookie = `token=${res.data.token} secure`
-
-            // Refresh access token
-            setAccessToken(res.data.token)
-
-            // Refreshed correctly
-            resolve()
-          } else {
-            reject(new Error(res.message))
-          }
-        })
-        .catch(err => {
-          reject(err)
-        })
+      // Removed this
     })
   }
 
