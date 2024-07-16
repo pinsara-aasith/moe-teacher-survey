@@ -12,6 +12,9 @@ interface ISchool {
   province: string;
   zone: string;
   division: string;
+
+
+  asdfjkadfljkhasdjkhafsdjkhasdfhjkadsfkj
 }
 
 // Define TypeScript interfaces for your models
