@@ -1,6 +1,6 @@
 # Teacher Survey Application (Ministry of Education)
 
-This is a Next.js application designed for conducting teacher surveys for the Ministry of Education. It uses JWT for authentication.
+This is a Next.js application designed for conducting teacher surveys for the Ministry of Education.
 
 ## Table of Contents
 
